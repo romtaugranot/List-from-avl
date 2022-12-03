@@ -9,21 +9,22 @@
 
 
 class AVLNode(object):
-
     """Constructor, you are allowed to add more fields.
 
 	@type value: str
 	@param value: data of your node
 	"""
 
-    def __init__(self, value, parent=None, right=None, left=None):
+    def __init__(self, value, isReal=True, parent=None, right=None, left=None):
+        self.isReal = isReal
         self.value = value
         self.left = left
         self.right = right
         self.parent = parent
+        self.bf = self.left.height - self.right.height
         if left is None and right is None:
-            self.height = -1
-        else:
+            self.height = 0
+        else:  # node isn't a leaf.
             self.height = max(left.height, right.height) + 1
 
     """returns the left child
@@ -31,9 +32,8 @@ class AVLNode(object):
 	@returns: the left child of self, None if there is no left child
 	"""
 
-
     def getLeft(self):
-        return None
+        return self.left if self.isReal else None
 
     """returns the right child
 
@@ -42,7 +42,7 @@ class AVLNode(object):
 	"""
 
     def getRight(self):
-        return None
+        return self.right if self.isReal else None
 
     """returns the parent 
 
@@ -51,7 +51,7 @@ class AVLNode(object):
 	"""
 
     def getParent(self):
-        return None
+        return self.parent if self.isReal else None
 
     """return the value
 
@@ -60,7 +60,7 @@ class AVLNode(object):
 	"""
 
     def getValue(self):
-        return None
+        return self.value if self.isReal else None
 
     """returns the height
 
@@ -69,7 +69,7 @@ class AVLNode(object):
 	"""
 
     def getHeight(self):
-        return -1
+        return self.height if self.isReal else -1
 
     """sets left child
 
@@ -78,7 +78,7 @@ class AVLNode(object):
 	"""
 
     def setLeft(self, node):
-        return None
+        self.left = node
 
     """sets right child
 
@@ -87,7 +87,7 @@ class AVLNode(object):
 	"""
 
     def setRight(self, node):
-        return None
+        self.right = node
 
     """sets parent
 
@@ -96,7 +96,7 @@ class AVLNode(object):
 	"""
 
     def setParent(self, node):
-        return None
+        self.parent = node
 
     """sets value
 
@@ -105,7 +105,7 @@ class AVLNode(object):
 	"""
 
     def setValue(self, value):
-        return None
+        self.value = value
 
     """sets the balance factor of the node
 
@@ -114,7 +114,7 @@ class AVLNode(object):
 	"""
 
     def setHeight(self, h):
-        return None
+        self.height = h
 
     """returns whether self is not a virtual node 
 
@@ -123,7 +123,7 @@ class AVLNode(object):
 	"""
 
     def isRealNode(self):
-        return False
+        return self.isReal
 
 
 """
