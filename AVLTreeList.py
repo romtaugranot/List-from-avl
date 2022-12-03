@@ -125,6 +125,11 @@ class AVLNode(object):
     def isRealNode(self):
         return self.isReal
 
+    """sets the node to be virtual"""
+
+    def setVirtual(self, var):
+        self.isReal = var
+
 
 """
 A class implementing the ADT list, using an AVL tree.
@@ -134,7 +139,7 @@ A class implementing the ADT list, using an AVL tree.
 class AVLTreeList(object):
     """
 	Constructor, you are allowed to add more fields.  
-
+    @imp_inv: empty() == True if and only if root is None
 	"""
 
     def __init__(self):
@@ -150,7 +155,7 @@ class AVLTreeList(object):
 	"""
 
     def empty(self):
-        return None
+        return self.root is None
 
     """retrieves the value of the i'th item in the list
 
@@ -273,4 +278,153 @@ class AVLTreeList(object):
 	"""
 
     def getRoot(self):
-        return None
+        return self.root
+
+
+"""Rom's and Ido's functions"""
+
+""" tree-search method from class. """
+
+
+def tree_search(x, k):
+    while x is not None:
+        if k == x.value:
+            return x
+        elif k < x.value:
+            x = x.left
+        else:
+            x = x.right
+    return x
+
+
+""" tree-position method from class. """
+
+
+def tree_position(x, k):
+    y = None
+    while x is not None:
+        y = x
+        if k == x.value:
+            return x
+        elif k < x.value:
+            x = x.left
+        else:
+            x = x.right
+    return y
+
+
+"""sorted-order method from class."""
+
+
+def sorted_order(x):
+    if x is not None:
+        sorted_order(x.left)
+        print(x)
+        sorted_order(x.right)
+
+
+"""minimum method from class.
+    @pre: x is not None"""
+
+
+def minimum(x):
+    while x.left is not None:
+        x = x.left
+    return x
+
+
+"""maximum method.
+    @pre: x is not None"""
+
+
+def maximum(x):
+    while x.right is not None:
+        x = x.right
+    return x
+
+
+"""successor method from class.
+    @inv: successor is None if and only if x.value is the largest value in the tree.
+    @pre: x is not None"""
+
+
+def successor(x):
+    if x.right is not None:
+        return minimum(x.right)
+    y = x.parent
+    while y is not None and x == y.right:
+        x = y
+        y = x.parent
+    return y
+
+
+"""predecessor method from class.
+    @inv: predecessor is None if and only if x.value is the smallest value in the tree.
+    @pre: x is not None"""
+
+
+def predecessor(x):
+    if x.left is not None:
+        return maximum(x.right)
+    y = x.parent
+    while y is not None and x == y.left:
+        x = y
+        y = x.parent
+    return y
+
+
+"""tree-insert from class.
+    @pre: z is not None and x is not None and z isn't in x's sub-tree"""
+
+
+def tree_insert(x, z):
+    y = tree_position(x, z.value)
+    z.parent = y
+    if z.value < y.key:
+        y.left = z
+    else:
+        y.right = z
+
+
+"""tree-delete method.
+    @pre: bst is not None and z is in bst (which also means it isn't None)."""
+
+
+def tree_delete(bst, z):
+    y = z.parent
+    if y is None:  # z is the only node in tree
+        bst.root = None
+        z.setVirtual()
+        return
+    has_two_children = z.left is not None and z.right is not None
+
+    if not has_two_children:  # by pass or remove.
+        x = None # if z is leaf.
+        if z.left is None:
+            x = z.right
+        else: # z.right is None:
+            x = z.left
+        if z == y.right:
+            y.right = x
+        else:  # z == y.left
+            y.left = x
+
+        # for extra safety
+        z.setVirtual(False)
+
+    else:  # z has 2 children. im keeping a conservative approach and assuming we have an outside pointer to z,
+        # so we can't just change z's info to be x's info.
+        x = successor(z)
+        tree_delete(bst, x)
+        x.setVirtual(True)
+        x.setLeft(z.left)
+        x.setRight(z.right)
+        x.setParent(z.parent)
+        # TODO: need to change height as well in the future
+        if z == y.left:
+            y.left = x
+        else:
+            y.right = x
+
+
+
