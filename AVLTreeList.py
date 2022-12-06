@@ -1,8 +1,8 @@
 # username - romgranot
 # id1      - 325020790
 # name1    - Rom Granot
-# id2      - complete info
-# name2    - complete info
+# id2      - 325260362
+# name2    - Ido Ben David
 
 
 """A class representing a node in an AVL tree"""
