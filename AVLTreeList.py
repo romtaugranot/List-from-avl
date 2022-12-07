@@ -122,12 +122,12 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 
-    def isRealNode(self):
+    def getIsReal(self):
         return self.isReal
 
     """sets the node to be virtual"""
 
-    def setVirtual(self, var):
+    def setIsReal(self, var):
         self.isReal = var
 
 
@@ -378,6 +378,11 @@ def predecessor(x):
 
 
 def tree_insert(x, z):
+    if x is None:
+        x = z
+    else:
+        tree_insert_not_null(x, z)
+def tree_insert_not_null(x, z):
     y = tree_position(x, z.value)
     z.parent = y
     if z.value < y.key:
@@ -394,7 +399,7 @@ def tree_delete(bst, z):
     y = z.parent
     if y is None:  # z is the only node in tree
         bst.root = None
-        z.setVirtual()
+        z.setIsReal(False)
         return
     has_two_children = z.left is not None and z.right is not None
 
@@ -410,13 +415,13 @@ def tree_delete(bst, z):
             y.left = x
 
         # for extra safety
-        z.setVirtual(False)
+        z.setIsReal(False)
 
     else:  # z has 2 children. im keeping a conservative approach and assuming we have an outside pointer to z,
         # so we can't just change z's info to be x's info.
         x = successor(z)
         tree_delete(bst, x)
-        x.setVirtual(True)
+        x.setIsReal(False)
         x.setLeft(z.left)
         x.setRight(z.right)
         x.setParent(z.parent)
