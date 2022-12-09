@@ -482,6 +482,7 @@ def tree_delete(bst, z):
         x.setParent(y)
         x.setRight(z.getRight())
         x.setLeft(z.getLeft())
+
     delete_connections_from_node(z)
 
 
