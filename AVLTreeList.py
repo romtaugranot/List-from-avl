@@ -5,7 +5,7 @@
 # name2    - Ido Ben David
 
 
-"""A class represnting a node in an AVL tree"""
+"""A class representing a node in an AVL tree"""
 
 
 class AVLNode(object):
@@ -173,6 +173,15 @@ class AVLNode(object):
         return self.value is not None
 
 
+    """in-order representation of the tree"""
+
+    def __repr__(self):
+        if self.left is None:  # only virtual nodes have children that are None
+            return "(None)"
+        out = "(" + str(self.left) + ", " + str(self.value) + ", " + str(self.right) + ")"
+        return out
+
+
 """
 A class implementing the ADT list, using an AVL tree.
 """
@@ -186,7 +195,7 @@ class AVLTreeList(object):
 
     def __init__(self):
         self.size = 0
-        self.root = None
+        self.root = AVLNode(None)
 
     # add your fields here
 
@@ -209,7 +218,7 @@ class AVLTreeList(object):
     """
 
     def retrieve(self, i):
-        return None
+        return tree_select(self.root, i+1).getValue()
 
     """inserts val at position i in the list
 
@@ -223,7 +232,8 @@ class AVLTreeList(object):
     """
 
     def insert(self, i, val):
-        return -1
+        insert_tree(self, i, AVLNode(val))
+        self.size = self.root.getSize()
 
     """deletes the i'th item in the list
 
@@ -235,7 +245,8 @@ class AVLTreeList(object):
     """
 
     def delete(self, i):
-        return -1
+        tree_delete(self, tree_select(self.getRoot(), i+1))
+        self.size = self.root.getSize()
 
     """returns the value of the first item in the list
 
@@ -319,6 +330,9 @@ class AVLTreeList(object):
     @returns: the root, None if the list is empty
     """
 
+    def getRoot(self):
+        return self.root if self.length() != 0 else None
+
 
     """sets the root of the node
 
@@ -328,6 +342,11 @@ class AVLTreeList(object):
 
     def setRoot(self, root):
         self.root = root
+
+
+    """representation of the tree"""
+    def __repr__(self):
+        return str(self.root)
 
 
     """Rom's and Ido's functions"""
@@ -385,7 +404,7 @@ def successor(x):
 
 def predecessor(x):
     if x.getLeft().isRealNode() is not None:
-        return maximum(x.getRight())
+        return maximum(x.getLeft())
     y = x.getParent()
     while y is not None and y.isRealNode() and x == y.getLeft():
         x = y
@@ -422,25 +441,49 @@ def tree_rank(x):
     return r
 
 
-"""insert from the powerpoint representation
+"""updates all the size fields from z up to the root
+    this method is used to help insertion / deletion / rotation etc.
+    @pre: z is not None and z.isRealNode()
+    @pre: shift is an integer, can be negative."""
+
+
+def update_sizes_up_to_root(z, shift):
+    y = z.parent
+    while y is not None and y.isRealNode():
+        y.setSize(y.getSize() + shift)
+        y = y.getParent()
+
+
+"""insert-tree from the powerpoint representation
     @pre: bst is not None
     @pre:z is not None and z.isRealNode()
-    @pre: 0 <= i <= bst's size"""
+    @pre: 0 <= i < bst's size"""
 
 
-def insert(bst, i, z):
-    if not bst.getRoot().isRealNode():
-        bst.setRoot(z)
-    if i == bst.length():
+def insert_tree(bst, i, z):
+    if i == 0:
+        if bst.getRoot() is None or not bst.getRoot().isRealNode():
+            bst.setRoot(z)
+            return
+        else:
+            y = minimum(bst.getRoot())
+            y.setLeft(z)
+            z.setParent(y)
+    elif i == bst.length():
         y = maximum(bst.getRoot())
         y.setRight(z)
+        z.setParent(y)
     else:
-        x = tree_rank(tree_select(bst.getRoot(), i + 1))
+        x = tree_select(bst.getRoot(), i + 1)
         if not x.left.isRealNode():
             x.setLeft(z)
+            z.setParent(x)
         else:
             y = predecessor(x)
             y.setRight(z)
+            z.setParent(y)
+
+    update_sizes_up_to_root(z, 1)
 
     # TODO: fix tree (when it is an avl)
 
@@ -461,16 +504,20 @@ def tree_delete(bst, z):
         bst.setRoot(AVLNode(None))  # make the root a virtual node, which means there are no nodes in the tree.
         delete_connections_from_node(z)
         return
+    update_sizes_up_to_root(z, -1)
     y = z.getParent()  # guaranteed to be not None and not virtual because z isn't root.
-    if not z.getLeft().isRealNode() and not z.getRight().isRealNode():  # z is a leaf.
+    if not z.getLeft().isRealNode() or not z.getRight().isRealNode():
+        x = AVLNode(None)  # if z is a leaf.
+        if z.getLeft().isRealNode():  # z only has left child.
+            x = z.getLeft()
+        elif z.getRight().isRealNode():  # z only has right child.
+            x = z.getRight()
+
         if z == y.getRight():
-            y.setRight(AVLNode(None))  # simply delete z if it's a right child.
+            y.setRight(x)
         if z == y.getLeft():
-            y.setLeft(AVLNode(None))  # simply delete z if it's a left child.
-    elif not z.getLeft().isRealNode():  # z only has right child.
-        y.setRight(z.getRight())
-    elif not z.getRight().isRealNode():  # z only has left child.
-        y.setLeft(z.getLeft())
+            y.setLeft(x)
+        x.setParent(y)
     else:  # z has 2 children. im keeping a conservative approach and assuming we have an outside pointer to z,
         # so we can't just change z's info to be x's info.
         x = successor(z)
