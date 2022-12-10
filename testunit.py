@@ -95,6 +95,8 @@ class MyTestCase(unittest.TestCase):
 
     def test_listToArray(self):
         tree = AVLTreeList()
+        self.assertEqual("[]", str(tree.listToArray()))
+
         tree.insert(0, "meow")
         tree.insert(1, "daddy")
         tree.insert(1, "mommy")

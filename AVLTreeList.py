@@ -279,7 +279,7 @@ class AVLTreeList(object):
 
 
     def listToArray(self):
-        return listToArray(self.getRoot())  # the method is down below with the rest of the supporting methods.
+        return listToArray(self.root)  # the method is down below with the rest of the supporting methods.
 
     """returns the size of the list 
 
