@@ -3,7 +3,7 @@
 # name1    - Rom Granot
 # id2      - 325260362
 # name2    - Ido Ben David
-
+import random
 
 """A class representing a node in an AVL tree"""
 
@@ -176,6 +176,10 @@ class AVLNode(object):
     def isRealNode(self):
         return self.value is not None
 
+    def is_leaf(self):
+        return self.isRealNode() and not self.left.isRealNode() and not self.right.isRealNode()
+
+
     """in-order representation of the tree"""
 
     def __repr__(self):
@@ -299,14 +303,14 @@ class AVLTreeList(object):
     def sort(self):
         return None
 
-    """permute the info values of the list 
-
-    @rtype: list
-    @returns: an AVLTreeList where the values are permuted randomly by the info of the original list. ##Use Randomness
-    """
+    """permute the info values of the list """
 
     def permutation(self):
-        return None
+        lst = self.listToArray()
+        random.shuffle(lst)  # runtime is O(n) by the API.
+        lst.append(0)
+        fill_tree_in_order(self.root, lst)  # method is in the supporting methods below.
+
 
     """concatenates lst to self
 
@@ -328,7 +332,7 @@ class AVLTreeList(object):
     """
 
     def search(self, val):
-        return None
+        return search_tree(self.min, val)
 
     """returns the root of the tree representing the list
 
@@ -506,42 +510,37 @@ def insert_tree(bst, i, z):
 
 
 def tree_delete(bst, z):
-    def delete_connections_from_node(node):
-        node.setParent(None)
-        node.setRight(AVLNode(None))
-        node.setLeft(AVLNode(None))
-
-    if z == bst.getRoot():
+    if z == bst.getRoot() and z.is_leaf():
         bst.setRoot(AVLNode(None))  # make the root a virtual node, which means there are no nodes in the tree.
-        delete_connections_from_node(z)
         return
     update_sizes_up_to_root(z, -1)
-    y = z.getParent()  # guaranteed to be not None and not virtual because z isn't root.
-    if not z.getLeft().isRealNode() or not z.getRight().isRealNode():
-        x = AVLNode(None)  # if z is a leaf.
+    y = z.getParent()
+    if z.is_leaf():
+        # z isn't a root for sure.
+        if z == y.getRight():
+            y.setRight(AVLNode(None))
+        if z == y.getLeft():
+            y.setLeft(AVLNode(None))
+    if not z.getLeft().isRealNode() or not z.getRight().isRealNode():  # z has only one child
+        x = z.getRight()
         if z.getLeft().isRealNode():  # z only has left child.
             x = z.getLeft()
-        elif z.getRight().isRealNode():  # z only has right child.
-            x = z.getRight()
 
-        if z == y.getRight():
-            y.setRight(x)
-        if z == y.getLeft():
-            y.setLeft(x)
-        x.setParent(y)
-    else:  # z has 2 children. im keeping a conservative approach and assuming we have an outside pointer to z,
-        # so we can't just change z's info to be x's info.
-        x = successor(z)
-        tree_delete(bst, x)
-        if z == y.getRight():
-            y.setRight(x)
+        if z != bst.getRoot():  # for sure y is not None if z isn't bst's root.
+            if z == y.getRight():
+                y.setRight(x)
+            if z == y.getLeft():
+                y.setLeft(x)
         else:
-            y.setLeft(x)
-        x.setParent(y)
-        x.setRight(z.getRight())
-        x.setLeft(z.getLeft())
+            bst.setRoot(x)
 
-    delete_connections_from_node(z)
+        x.setParent(y)
+    else:  # z has 2 children.
+        x = successor(z)
+        val = x.getValue()
+        tree_delete(bst, x)
+        z.setValue(val)
+
     bst.updateMinMax()
 
 
@@ -551,12 +550,40 @@ def tree_delete(bst, z):
 
 
 def listToArray(node):
-    if not node.isRealNode():  # node is virtual.
+    if not node.isRealNode():
         return []
-    if not node.getLeft().isRealNode() and not node.getRight().isRealNode():  # node is a leaf.
+    if node.is_leaf():
         return [node.getValue()]
     lst = []
     lst += listToArray(node.getLeft())
     lst.append(node.getValue())
     lst += listToArray(node.getRight())
     return lst
+
+
+"""fill_tree_in_order method, inserts the values in lst to the tree
+    @pre: node is not None
+    @pre: lst's size - index is the node's sub-tree size"""
+
+
+def fill_tree_in_order(node, lst):
+    if not node.isRealNode():
+        return
+    elif node.is_leaf():
+        node.setValue(lst[lst[len(lst)-1]])
+        lst[len(lst) - 1] += 1
+    else:
+        fill_tree_in_order(node.getLeft(), lst)
+        node.setValue(lst[lst[len(lst) - 1]])
+        lst[len(lst) - 1] += 1
+        fill_tree_in_order(node.getRight(), lst)
+
+
+"""search_tree method, looks for a value in the tree
+    @pre: val is a string"""
+
+
+def search_tree(node, val):
+    if node is None or not node.isRealNode():
+        return -1
+    return tree_rank(node) - 1 if node.getValue() == val else search_tree(successor(node), val)

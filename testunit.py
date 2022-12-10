@@ -1,6 +1,6 @@
 import unittest
 
-from AVLTreeList import AVLTreeList
+from AVLTreeList import AVLTreeList, successor
 
 
 class MyTestCase(unittest.TestCase):
@@ -98,6 +98,8 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual("[]", str(tree.listToArray()))
 
         tree.insert(0, "meow")
+        self.assertEqual("['meow']", str(tree.listToArray()))
+
         tree.insert(1, "daddy")
         tree.insert(1, "mommy")
         tree.insert(2, "sonny")
@@ -111,6 +113,42 @@ class MyTestCase(unittest.TestCase):
         tree.delete(0)  # deleted dottary
         tree.delete(2)  # deleted daddy
         self.assertEqual("['meow', 'sonny']", str(tree.listToArray()))
+
+
+    def test_permutations(self):
+        tree = AVLTreeList()
+        tree.insert(0, "1")
+        tree.insert(1, "2")
+        tree.insert(1, "3")
+        tree.insert(2, "4")
+        tree.insert(0, "5")
+        tree.insert(3, "6")
+        tree.insert(0, "7")
+        tree.insert(5, "8")
+        #print(tree.listToArray())
+        #tree.permutation()
+        #print(tree.listToArray())
+
+
+    def test_search(self):
+        tree = AVLTreeList()
+        tree.insert(0, "1")
+        tree.insert(1, "2")
+        tree.insert(1, "3")
+        tree.insert(2, "1")
+        tree.insert(0, "5")
+        tree.insert(3, "6")
+        tree.insert(0, "7")
+        tree.insert(5, "8")
+        print(tree.listToArray())
+
+        # ['7', '5', '1', '3', '6', '8', '1', '2']
+        self.assertEqual('2', str(tree.search('1')))
+        self.assertEqual('-1', str(tree.search("meow")))
+        tree.delete(2)
+        # ['7', '5', '3', '6', '8', '1', '2']
+        print(tree.listToArray())
+        self.assertEqual('5', str(tree.search("1")))
 
 
 if __name__ == '__main__':
