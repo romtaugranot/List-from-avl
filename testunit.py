@@ -66,9 +66,32 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual("(((None), dottary, (None)), meow, ((None), daddy, (None)))", str(tree))
 
         tree.insert(2, "sonny")
-        tree.delete(3)
+        tree.delete(3)  # deleted daddy
         self.assertEqual("3", str(tree.length()))
         self.assertEqual("(((None), dottary, (None)), meow, ((None), sonny, (None)))", str(tree))
+
+
+    def test_first_and_last(self):
+        tree = AVLTreeList()
+        tree.insert(0, "meow")
+        tree.insert(1, "daddy")
+        tree.insert(1, "mommy")
+        tree.insert(2, "sonny")
+        tree.insert(0, "dottary")
+
+        self.assertEqual("dottary", tree.first())
+        self.assertEqual("daddy", tree.last())
+
+        tree.delete(2)  # deleted mommy
+        tree.delete(2)  # deleted sonny
+        self.assertEqual("daddy", tree.last())
+
+        tree.delete(2)  # deleted daddy
+        self.assertEqual("meow", tree.last())
+
+        tree.delete(0)  # deleted dottary
+        self.assertEqual(tree.first(), tree.last())
+
 
 
 

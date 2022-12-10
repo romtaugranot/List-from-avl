@@ -24,6 +24,8 @@ class AVLNode(object):
             self.bf = 0
             self.height = -1
             self.size = 0
+            self.min = None
+            self.max = None
         else:  # node is not virtual
             if left is None:
                 self.left = AVLNode(None, self)
@@ -99,6 +101,7 @@ class AVLNode(object):
     def getBF(self):
         return self.bf
 
+
     """sets left child
 
     @type node: AVLNode
@@ -163,6 +166,7 @@ class AVLNode(object):
     def updateBF(self):
         self.bf = self.left.height - self.right.height
 
+
     """returns whether self is not a virtual node 
 
     @rtype: bool
@@ -171,7 +175,6 @@ class AVLNode(object):
 
     def isRealNode(self):
         return self.value is not None
-
 
     """in-order representation of the tree"""
 
@@ -196,6 +199,8 @@ class AVLTreeList(object):
     def __init__(self):
         self.size = 0
         self.root = AVLNode(None)
+        self.min = self.root
+        self.max = self.root
 
     # add your fields here
 
@@ -218,7 +223,7 @@ class AVLTreeList(object):
     """
 
     def retrieve(self, i):
-        return tree_select(self.root, i+1).getValue()
+        return tree_select(self.root, i + 1).getValue()
 
     """inserts val at position i in the list
 
@@ -245,7 +250,7 @@ class AVLTreeList(object):
     """
 
     def delete(self, i):
-        tree_delete(self, tree_select(self.getRoot(), i+1))
+        tree_delete(self, tree_select(self.getRoot(), i + 1))
         self.size = self.root.getSize()
 
     """returns the value of the first item in the list
@@ -255,7 +260,7 @@ class AVLTreeList(object):
     """
 
     def first(self):
-        return None
+        return self.min.getValue()
 
     """returns the value of the last item in the list
 
@@ -264,7 +269,7 @@ class AVLTreeList(object):
     """
 
     def last(self):
-        return None
+        return self.max.getValue()
 
     """returns an array representing list 
 
@@ -333,7 +338,6 @@ class AVLTreeList(object):
     def getRoot(self):
         return self.root if self.length() != 0 else None
 
-
     """sets the root of the node
 
         @type root: AVLNode
@@ -344,10 +348,17 @@ class AVLTreeList(object):
         self.root = root
 
 
+    """updates the minimum / maximum of the tree"""
+
+    def updateMinMax(self):
+        self.min = minimum(self.root)
+        self.max = maximum(self.root)
+
+
     """representation of the tree"""
+
     def __repr__(self):
         return str(self.root)
-
 
     """Rom's and Ido's functions"""
 
@@ -484,7 +495,7 @@ def insert_tree(bst, i, z):
             z.setParent(y)
 
     update_sizes_up_to_root(z, 1)
-
+    bst.updateMinMax()
     # TODO: fix tree (when it is an avl)
 
 
@@ -498,7 +509,6 @@ def tree_delete(bst, z):
         node.setParent(None)
         node.setRight(AVLNode(None))
         node.setLeft(AVLNode(None))
-
 
     if z == bst.getRoot():
         bst.setRoot(AVLNode(None))  # make the root a virtual node, which means there are no nodes in the tree.
@@ -531,5 +541,4 @@ def tree_delete(bst, z):
         x.setLeft(z.getLeft())
 
     delete_connections_from_node(z)
-
-
+    bst.updateMinMax()
