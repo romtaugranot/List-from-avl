@@ -93,7 +93,22 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(tree.first(), tree.last())
 
 
+    def test_listToArray(self):
+        tree = AVLTreeList()
+        tree.insert(0, "meow")
+        tree.insert(1, "daddy")
+        tree.insert(1, "mommy")
+        tree.insert(2, "sonny")
+        tree.insert(0, "dottary")
 
+        self.assertEqual("['dottary', 'meow', 'mommy', 'sonny', 'daddy']", str(tree.listToArray()))
+
+        tree.delete(2)  # deleted mommy
+        self.assertEqual("['dottary', 'meow', 'sonny', 'daddy']", str(tree.listToArray()))
+
+        tree.delete(0)  # deleted dottary
+        tree.delete(2)  # deleted daddy
+        self.assertEqual("['meow', 'sonny']", str(tree.listToArray()))
 
 
 if __name__ == '__main__':

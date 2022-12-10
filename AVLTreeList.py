@@ -279,7 +279,7 @@ class AVLTreeList(object):
 
 
     def listToArray(self):
-        return None
+        return listToArray(self.getRoot())  # the method is down below with the rest of the supporting methods.
 
     """returns the size of the list 
 
@@ -543,3 +543,20 @@ def tree_delete(bst, z):
 
     delete_connections_from_node(z)
     bst.updateMinMax()
+
+
+
+"""listToArray method, converts an avl tree into a list
+    @pre: node is not None"""
+
+
+def listToArray(node):
+    if not node.isRealNode():  # node is virtual.
+        return []
+    if not node.getLeft().isRealNode() and not node.getRight().isRealNode():  # node is a leaf.
+        return [node.getValue()]
+    lst = []
+    lst += listToArray(node.getLeft())
+    lst.append(node.getValue())
+    lst += listToArray(node.getRight())
+    return lst
