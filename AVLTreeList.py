@@ -245,8 +245,11 @@ class AVLTreeList(object):
     """
 
     def insert(self, i, val):
-        insert_tree(self, i, AVLNode(val))
+        z = AVLNode(val)
+        insert_tree(self, i, z)
+        ret = fix_tree(self, z, True)
         self.size = self.root.getSize()
+        return ret
 
     """deletes the i'th item in the list
 
@@ -258,8 +261,13 @@ class AVLTreeList(object):
     """
 
     def delete(self, i):
-        tree_delete(self, tree_select(self.getRoot(), i + 1))
+
+        curr = tree_delete(self, tree_select(self.getRoot(), i + 1))
+        if curr is None:
+            return -1
+        ret = fix_tree(self, curr)
         self.size = self.root.getSize()
+        return ret
 
     """returns the value of the first item in the list
 
@@ -503,12 +511,10 @@ def insert_tree(bst, i, z):
             y.setRight(z)
             z.setParent(y)
 
-    update_sizes_up_to_root(z, 1)
     bst.updateMinMax()
-    # TODO: fix tree (when it is an avl)
 
 
-"""tree-delete method.
+"""tree-delete method. returns the parent of the physically deleted node
     @pre: bst is not None and z is in bst
     @pre: z is not None and z.isRealNode()"""
 
@@ -516,11 +522,11 @@ def insert_tree(bst, i, z):
 def tree_delete(bst, z):
     if z == bst.getRoot() and z.is_leaf():
         bst.setRoot(AVLNode(None))  # make the root a virtual node, which means there are no nodes in the tree.
-        return
+        return None
     update_sizes_up_to_root(z, -1)
     y = z.getParent()
     if z.is_leaf():
-        # z isn't a root for sure.
+        # z is not a root for certain
         if z == y.getRight():
             y.setRight(AVLNode(None))
         if z == y.getLeft():
@@ -537,16 +543,14 @@ def tree_delete(bst, z):
                 y.setLeft(x)
         else:
             bst.setRoot(x)
-
         x.setParent(y)
     else:  # z has 2 children.
         x = successor(z)
         val = x.getValue()
-        tree_delete(bst, x)
+        y = tree_delete(bst, x) #z's successor has no left child, so the returned value will be x's parent for sure
         z.setValue(val)
-
     bst.updateMinMax()
-
+    return y
 
 
 """listToArray method, converts an avl tree into a list
@@ -599,17 +603,18 @@ def search_tree(node, val):
 
 def fix_tree(self, x, is_insert=False):
     counter = 0
+    z = x
     y = x.getParent()
-    while y is not None:
+    while y is not None:#continue until we reach root
         height = 1 + max(y.getLeft().getHeight(), y.getRight().getHeight())
         balance = y.getLeft().getHeight() - y.getRight.getHeight()
-        if abs(balance) < 2 and height == y.getHeight():
+        if abs(balance) < 2 and height == y.getHeight():#if the height has not changed
             break
-        elif abs(balance) < 2 and height != y.getHeight():
+        elif abs(balance) < 2 and height != y.getHeight():#if the height has changed
             y.setHeight(height)
             y.setBF(balance)
-            x = y
-            y = x.getParent()
+            z = y
+            y = z.getParent()
         else: #meaning abs(balance) == 2
             if balance == 2:
                 balance_child = y.getLeft().getLeft().getHeight() - y.getLeft().getRight().getHeight()
@@ -633,8 +638,15 @@ def fix_tree(self, x, is_insert=False):
                 break
             y.setHeight(height)
             y.setBF(balance)
-            x = y
-            y = x.getParent()
+            z = y
+            y = z.getParent()
+    self.root = z #if x is already the root it wont matter, if the root changed then x is now the updated root
+
+    y = x #updating sizes if needed
+    while y is not None:
+        y.updateSize()
+        y = y.getParent()
+
     return counter
 
 
@@ -654,11 +666,9 @@ def left_rotate(self, x):
         x.getParent().setLeft(y)
     x.setParent(y)
 
-    #updating heights, size and BF
+    #updating heights and BF
     x.updateHeight()
     y.updateHeight()
-    x.updateSize()
-    y.updateSize()
     x.updateBF()
     y.updateBF()
 
@@ -676,11 +686,9 @@ def right_rotate(self, x):
         x.getParent().setLeft(y)
     x.setParent(y)
 
-    # updating heights, size and BF
+    # updating heights and BF
     x.updateHeight()
     y.updateHeight()
-    x.updateSize()
-    y.updateSize()
     x.updateBF()
     y.updateBF()
 
