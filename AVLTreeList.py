@@ -156,6 +156,10 @@ class AVLNode(object):
     def setSize(self, size):
         self.size = size
 
+    """updates the height of the node according to its children"""
+    def updateHeight(self):
+        self.height = 1 + max(self.left.height, self.right.height)
+
     """updates the size of the node according to its children"""
 
     def updateSize(self):
@@ -587,3 +591,97 @@ def search_tree(node, val):
     if node is None or not node.isRealNode():
         return -1
     return tree_rank(node) - 1 if node.getValue() == val else search_tree(successor(node), val)
+
+
+"""fix_tree method fixes nodes from inputted node up until the root, returns the number of rotations
+    @pre: node is not None"""
+
+
+def fix_tree(self, x, is_insert=False):
+    counter = 0
+    y = x.getParent()
+    while y is not None:
+        height = 1 + max(y.getLeft().getHeight(), y.getRight().getHeight())
+        balance = y.getLeft().getHeight() - y.getRight.getHeight()
+        if abs(balance) < 2 and height == y.getHeight():
+            break
+        elif abs(balance) < 2 and height != y.getHeight():
+            y.setHeight(height)
+            y.setBF(balance)
+            x = y
+            y = x.getParent()
+        else: #meaning abs(balance) == 2
+            if balance == 2:
+                balance_child = y.getLeft().getLeft().getHeight() - y.getLeft().getRight().getHeight()
+                if balance_child > -1:
+                    right_rotate(self, y)
+                    counter += 1
+                else:
+                    left_rotate(self, y.getLeft())
+                    right_rotate(self, y)
+                    counter += 2
+            else: #meaning balance = -2
+                balance_child = y.getRight().getLeft().getHeight() - y.getRight().getRight().getHeight()
+                if balance_child < 1:
+                    left_rotate(self, y)
+                    counter += 1
+                else:
+                    right_rotate(self, y.getRight())
+                    left_rotate(self, y)
+                    counter += 2
+            if is_insert: #if this is after an insert, we can stop after a single rotation
+                break
+            y.setHeight(height)
+            y.setBF(balance)
+            x = y
+            y = x.getParent()
+    return counter
+
+
+"""left_rotate method rotates the inputted node and its children to the left, and updates their height, size and BF accordingly
+    @pre: node is not None"""
+def left_rotate(self, x):
+    y = x.getRight()
+
+    #updating the pointers
+    x.setRight(y.getLeft())
+    x.getRight().setParent(x)
+    y.setLeft(x)
+    y.setParent(x.getParent())
+    if x.getParent().getRight() == x:
+        x.getParent().setRight(y)
+    else:
+        x.getParent().setLeft(y)
+    x.setParent(y)
+
+    #updating heights, size and BF
+    x.updateHeight()
+    y.updateHeight()
+    x.updateSize()
+    y.updateSize()
+    x.updateBF()
+    y.updateBF()
+
+def right_rotate(self, x):
+    y = x.getLeft()
+
+    # updating the pointers
+    x.setLeft(y.getRight())
+    x.getLeft().setParent(x)
+    y.setRight(x)
+    y.setParent(x.getParent())
+    if x.getParent().getRight() == x:
+        x.getParent().setRight(y)
+    else:
+        x.getParent().setLeft(y)
+    x.setParent(y)
+
+    # updating heights, size and BF
+    x.updateHeight()
+    y.updateHeight()
+    x.updateSize()
+    y.updateSize()
+    x.updateBF()
+    y.updateBF()
+
+

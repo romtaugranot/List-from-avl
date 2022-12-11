@@ -125,7 +125,7 @@ class MyTestCase(unittest.TestCase):
         tree.insert(3, "6")
         tree.insert(0, "7")
         tree.insert(5, "8")
-        #print(tree.listToArray())
+        print(tree.listToArray())
         #tree.permutation()
         #print(tree.listToArray())
 
