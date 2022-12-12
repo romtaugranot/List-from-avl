@@ -29,12 +29,14 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual("(((None), dottary, (None)), meow, (((None), mommy, ((None), sonny, (None))), daddy, (None)))", str(tree))
 
 
+
     def test_retrieve(self):
         tree = AVLTreeList()
         tree.insert(0, "meow")
         tree.insert(1, "daddy")
         tree.insert(1, "mommy")
         tree.insert(2, "sonny")
+
         tree.insert(0, "dottary")
 
 
@@ -49,10 +51,11 @@ class MyTestCase(unittest.TestCase):
         tree = AVLTreeList()
         tree.insert(0, "meow")
         tree.insert(1, "daddy")
+
         tree.insert(1, "mommy")
+
         tree.insert(2, "sonny")
         tree.insert(0, "dottary")
-
         self.assertEqual("5", str(tree.length()))
         tree.delete(2)  # deleted mommy
         self.assertEqual("(((None), dottary, (None)), meow, (((None), sonny, (None)), daddy, (None)))", str(tree))

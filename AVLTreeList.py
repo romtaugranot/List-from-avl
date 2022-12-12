@@ -156,6 +156,12 @@ class AVLNode(object):
     def setSize(self, size):
         self.size = size
 
+    """sets the BF of the node
+    
+        @type bf: int
+        @param bf: balance factor of the node"""
+    def setBF(self, bf):
+        self.bf = bf
     """updates the height of the node according to its children"""
     def updateHeight(self):
         self.height = 1 + max(self.left.height, self.right.height)
@@ -245,8 +251,7 @@ class AVLTreeList(object):
     """
 
     def insert(self, i, val):
-        z = AVLNode(val)
-        insert_tree(self, i, z)
+        z = insert_tree(self, i, AVLNode(val))
         ret = fix_tree(self, z, True)
         self.size = self.root.getSize()
         return ret
@@ -263,12 +268,15 @@ class AVLTreeList(object):
     def delete(self, i):
 
         curr = tree_delete(self, tree_select(self.getRoot(), i + 1))
+        """
         if curr is None:
             return -1
         ret = fix_tree(self, curr)
+        """
         self.size = self.root.getSize()
+        """
         return ret
-
+        """
     """returns the value of the first item in the list
 
     @rtype: str
@@ -475,11 +483,12 @@ def tree_rank(x):
     @pre: shift is an integer, can be negative."""
 
 
-def update_sizes_up_to_root(z, shift):
+def update_sizes_up_to_root(self, z, shift):
     y = z.parent
     while y is not None and y.isRealNode():
         y.setSize(y.getSize() + shift)
         y = y.getParent()
+
 
 
 """insert-tree from the powerpoint representation
@@ -492,7 +501,7 @@ def insert_tree(bst, i, z):
     if i == 0:
         if bst.getRoot() is None or not bst.getRoot().isRealNode():
             bst.setRoot(z)
-            return
+            return z
         else:
             y = minimum(bst.getRoot())
             y.setLeft(z)
@@ -510,8 +519,8 @@ def insert_tree(bst, i, z):
             y = predecessor(x)
             y.setRight(z)
             z.setParent(y)
-
     bst.updateMinMax()
+    return z
 
 
 """tree-delete method. returns the parent of the physically deleted node
@@ -523,7 +532,7 @@ def tree_delete(bst, z):
     if z == bst.getRoot() and z.is_leaf():
         bst.setRoot(AVLNode(None))  # make the root a virtual node, which means there are no nodes in the tree.
         return None
-    update_sizes_up_to_root(z, -1)
+    update_sizes_up_to_root(bst, z, -1)
     y = z.getParent()
     if z.is_leaf():
         # z is not a root for certain
@@ -603,11 +612,10 @@ def search_tree(node, val):
 
 def fix_tree(self, x, is_insert=False):
     counter = 0
-    z = x
     y = x.getParent()
-    while y is not None:#continue until we reach root
+    while y is not None and y.isRealNode():#continue until we reach root
         height = 1 + max(y.getLeft().getHeight(), y.getRight().getHeight())
-        balance = y.getLeft().getHeight() - y.getRight.getHeight()
+        balance = y.getLeft().getHeight() - y.getRight().getHeight()
         if abs(balance) < 2 and height == y.getHeight():#if the height has not changed
             break
         elif abs(balance) < 2 and height != y.getHeight():#if the height has changed
@@ -640,7 +648,11 @@ def fix_tree(self, x, is_insert=False):
             y.setBF(balance)
             z = y
             y = z.getParent()
-    self.root = z #if x is already the root it wont matter, if the root changed then x is now the updated root
+    if self.root is not None:
+        y = self.root
+        while y.getParent() is not None and y.getParent().isRealNode():
+            y = y.getParent()
+    self.setRoot(y)
 
     y = x #updating sizes if needed
     while y is not None:
@@ -660,10 +672,11 @@ def left_rotate(self, x):
     x.getRight().setParent(x)
     y.setLeft(x)
     y.setParent(x.getParent())
-    if x.getParent().getRight() == x:
-        x.getParent().setRight(y)
-    else:
-        x.getParent().setLeft(y)
+    if x.getParent() is not None:
+        if x.getParent().getRight() == x:
+            x.getParent().setRight(y)
+        else:
+            x.getParent().setLeft(y)
     x.setParent(y)
 
     #updating heights and BF
@@ -671,6 +684,8 @@ def left_rotate(self, x):
     y.updateHeight()
     x.updateBF()
     y.updateBF()
+    x.updateSize()
+    y.updateSize()
 
 def right_rotate(self, x):
     y = x.getLeft()
@@ -680,10 +695,11 @@ def right_rotate(self, x):
     x.getLeft().setParent(x)
     y.setRight(x)
     y.setParent(x.getParent())
-    if x.getParent().getRight() == x:
-        x.getParent().setRight(y)
-    else:
-        x.getParent().setLeft(y)
+    if x.getParent() is not None:
+        if x.getParent().getRight() == x:
+            x.getParent().setRight(y)
+        else:
+            x.getParent().setLeft(y)
     x.setParent(y)
 
     # updating heights and BF
@@ -691,5 +707,7 @@ def right_rotate(self, x):
     y.updateHeight()
     x.updateBF()
     y.updateBF()
+    x.updateSize()
+    y.updateSize()
 
 
