@@ -24,8 +24,6 @@ class AVLNode(object):
             self.bf = 0
             self.height = -1
             self.size = 0
-            self.min = None
-            self.max = None
         else:  # node is not virtual
             if left is None:
                 self.left = AVLNode(None, self)
@@ -716,20 +714,28 @@ def right_rotate(self, x):
     x.updateSize()
     y.updateSize()
 
+
 """copy creates and returns a new AVLTreeList with the same structure as the inputted AVLTreeList
     @rtype: AVLTreeList
     @returns: a copy of the original AVLTreeList"""
+
+
 def copy(self):
     head = copy_rec(self.root)
     ret = AVLTreeList()
     ret.root = head
     ret.size = ret.root.size
-    #TODO fix min and max for the returned copied AVLTreeList
+    ret.min = minimum(ret.root)
+    ret.max = maximum(ret.root)
     return ret
 
 
     return ret
+
+
 """copy_rec copies and returns the root of the copied AVLTreeList"""
+
+
 def copy_rec(node):
     if not node.isReal:
         return AVLNode(None)
@@ -748,10 +754,6 @@ def copy_rec(node):
     node_copy.height = node.height
     node_copy.size = node.size
     node_copy.bf = node.bf
-
-    #node_copy.min = node.min
-    #node_copy.max = node
-    #TODO fix min and max for the copy_rec function
 
     return node_copy
 
