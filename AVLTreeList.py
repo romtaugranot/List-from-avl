@@ -268,15 +268,15 @@ class AVLTreeList(object):
     def delete(self, i):
 
         curr = tree_delete(self, tree_select(self.getRoot(), i + 1))
-        """
+
         if curr is None:
             return -1
         ret = fix_tree(self, curr)
-        """
+
         self.size = self.root.getSize()
-        """
+
         return ret
-        """
+
     """returns the value of the first item in the list
 
     @rtype: str
@@ -613,16 +613,17 @@ def search_tree(node, val):
 def fix_tree(self, x, is_insert=False):
     counter = 0
     y = x.getParent()
+    if not is_insert:
+        y = x
     while y is not None and y.isRealNode():#continue until we reach root
         height = 1 + max(y.getLeft().getHeight(), y.getRight().getHeight())
         balance = y.getLeft().getHeight() - y.getRight().getHeight()
         if abs(balance) < 2 and height == y.getHeight():#if the height has not changed
             break
         elif abs(balance) < 2 and height != y.getHeight():#if the height has changed
-            y.setHeight(height)
-            y.setBF(balance)
-            z = y
-            y = z.getParent()
+            y.updateHeight()
+            y.updateBF()
+            y = y.getParent()
         else: #meaning abs(balance) == 2
             if balance == 2:
                 balance_child = y.getLeft().getLeft().getHeight() - y.getLeft().getRight().getHeight()
@@ -644,11 +645,10 @@ def fix_tree(self, x, is_insert=False):
                     counter += 2
             if is_insert: #if this is after an insert, we can stop after a single rotation
                 break
-            y.setHeight(height)
-            y.setBF(balance)
-            z = y
-            y = z.getParent()
-    if self.root is not None:
+            y.updateHeight()
+            y.updateBF()
+            y = y.getParent()
+    if self.root.isRealNode():
         y = self.root
         while y.getParent() is not None and y.getParent().isRealNode():
             y = y.getParent()
@@ -657,13 +657,16 @@ def fix_tree(self, x, is_insert=False):
     y = x #updating sizes if needed
     while y is not None:
         y.updateSize()
+        y.updateHeight()
+        y.updateBF()
         y = y.getParent()
 
     return counter
 
 
 """left_rotate method rotates the inputted node and its children to the left, and updates their height, size and BF accordingly
-    @pre: node is not None"""
+    @pre: x is not None
+    @pre: x is an AVLNode"""
 def left_rotate(self, x):
     y = x.getRight()
 
@@ -687,6 +690,9 @@ def left_rotate(self, x):
     x.updateSize()
     y.updateSize()
 
+"""left_rotate method rotates the inputted node and its children to the left, and updates their height, size and BF accordingly
+    @pre: x is not None
+    @pre: x is an AVLNode"""
 def right_rotate(self, x):
     y = x.getLeft()
 
@@ -710,4 +716,42 @@ def right_rotate(self, x):
     x.updateSize()
     y.updateSize()
 
+"""copy creates and returns a new AVLTreeList with the same structure as the inputted AVLTreeList
+    @rtype: AVLTreeList
+    @returns: a copy of the original AVLTreeList"""
+def copy(self):
+    head = copy_rec(self.root)
+    ret = AVLTreeList()
+    ret.root = head
+    ret.size = ret.root.size
+    #TODO fix min and max for the returned copied AVLTreeList
+    return ret
+
+
+    return ret
+"""copy_rec copies and returns the root of the copied AVLTreeList"""
+def copy_rec(node):
+    if not node.isReal:
+        return AVLNode(None)
+
+    node_copy = AVLNode(node.value)
+    if not node.parent.isReal: #parent = None, node is not None means that said node is the root
+        node_copy.parent = None
+
+    node_copy.right = copy_rec(node.right)
+    if node.right.isReal:
+        node_copy.right.setParent(node_copy)
+    node_copy.left = copy_rec(node.left)
+    if node.left.isReal:
+        node_copy.left.setParent(node_copy)
+
+    node_copy.height = node.height
+    node_copy.size = node.size
+    node_copy.bf = node.bf
+
+    #node_copy.min = node.min
+    #node_copy.max = node
+    #TODO fix min and max for the copy_rec function
+
+    return node_copy
 
