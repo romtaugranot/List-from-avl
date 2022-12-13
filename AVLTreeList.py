@@ -730,9 +730,6 @@ def copy(self):
     return ret
 
 
-    return ret
-
-
 """copy_rec copies and returns the root of the copied AVLTreeList"""
 
 
