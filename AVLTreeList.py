@@ -99,7 +99,6 @@ class AVLNode(object):
     def getBF(self):
         return self.bf
 
-
     """sets left child
 
     @type node: AVLNode
@@ -155,12 +154,15 @@ class AVLNode(object):
         self.size = size
 
     """sets the BF of the node
-    
+
         @type bf: int
         @param bf: balance factor of the node"""
+
     def setBF(self, bf):
         self.bf = bf
+
     """updates the height of the node according to its children"""
+
     def updateHeight(self):
         self.height = 1 + max(self.left.height, self.right.height)
 
@@ -174,7 +176,6 @@ class AVLNode(object):
     def updateBF(self):
         self.bf = self.left.height - self.right.height
 
-
     """returns whether self is not a virtual node 
 
     @rtype: bool
@@ -186,7 +187,6 @@ class AVLNode(object):
 
     def is_leaf(self):
         return self.isRealNode() and not self.left.isRealNode() and not self.right.isRealNode()
-
 
     """in-order representation of the tree"""
 
@@ -264,7 +264,6 @@ class AVLTreeList(object):
     """
 
     def delete(self, i):
-
         curr = tree_delete(self, tree_select(self.getRoot(), i + 1))
 
         if curr is None:
@@ -299,7 +298,6 @@ class AVLTreeList(object):
     @returns: a list of strings representing the data structure
     """
 
-
     def listToArray(self):
         return listToArray(self.root)  # the method is down below with the rest of the supporting methods.
 
@@ -319,15 +317,37 @@ class AVLTreeList(object):
     """
 
     def sort(self):
-        return None
 
-    """permute the info values of the list """
+        lst = self.listToArray()
+        lst.sort()  # runtime is O(n) by the API.
+        lst.append(0)  # index of the current node, for fill.
+        new_tree = copy(self)
+        fill_tree_in_order(new_tree.root, lst)
+        return new_tree
+
+    """permute the info values of the list
+     
+    @rtype: list
+    @returns: an AVLTreeList where the values are permuted.
+    """
 
     def permutation(self):
+        def shuffle(lst):
+            for i in range(len(lst) - 1, 0, -1):
+                # Pick a random index from 0 to i
+                j = random.randint(0, i)
+
+                # Swap arr[i] with the element at random index
+                lst[i], lst[j] = lst[j], lst[i]
+
+        if not self.root.isRealNode():
+            return AVLTreeList()
         lst = self.listToArray()
-        random.shuffle(lst)  # runtime is O(n) by the API.
-        lst.append(0)
-        fill_tree_in_order(self.root, lst)  # method is in the supporting methods below.
+        shuffle(lst)  # runtime is O(n) by the API.
+        lst.append(0)  # index of the current node, for fill.
+        new_tree = copy(self)
+        fill_tree_in_order(new_tree.root, lst)
+        return new_tree
 
 
     """concatenates lst to self
@@ -370,13 +390,11 @@ class AVLTreeList(object):
     def setRoot(self, root):
         self.root = root
 
-
     """updates the minimum / maximum of the tree"""
 
     def updateMinMax(self):
         self.min = minimum(self.root)
         self.max = maximum(self.root)
-
 
     """representation of the tree"""
 
@@ -488,7 +506,6 @@ def update_sizes_up_to_root(self, z, shift):
         y = y.getParent()
 
 
-
 """insert-tree from the powerpoint representation
     @pre: bst is not None
     @pre:z is not None and z.isRealNode()
@@ -554,7 +571,7 @@ def tree_delete(bst, z):
     else:  # z has 2 children.
         x = successor(z)
         val = x.getValue()
-        y = tree_delete(bst, x) #z's successor has no left child, so the returned value will be x's parent for sure
+        y = tree_delete(bst, x)  # z's successor has no left child, so the returned value will be x's parent for sure
         z.setValue(val)
     bst.updateMinMax()
     return y
@@ -585,7 +602,7 @@ def fill_tree_in_order(node, lst):
     if not node.isRealNode():
         return
     elif node.is_leaf():
-        node.setValue(lst[lst[len(lst)-1]])
+        node.setValue(lst[lst[len(lst) - 1]])
         lst[len(lst) - 1] += 1
     else:
         fill_tree_in_order(node.getLeft(), lst)
@@ -613,35 +630,35 @@ def fix_tree(self, x, is_insert=False):
     y = x.getParent()
     if not is_insert:
         y = x
-    while y is not None and y.isRealNode():#continue until we reach root
+    while y is not None and y.isRealNode():  # continue until we reach root
         height = 1 + max(y.getLeft().getHeight(), y.getRight().getHeight())
         balance = y.getLeft().getHeight() - y.getRight().getHeight()
-        if abs(balance) < 2 and height == y.getHeight():#if the height has not changed
+        if abs(balance) < 2 and height == y.getHeight():  # if the height has not changed
             break
-        elif abs(balance) < 2 and height != y.getHeight():#if the height has changed
+        elif abs(balance) < 2 and height != y.getHeight():  # if the height has changed
             y.updateHeight()
             y.updateBF()
             y = y.getParent()
-        else: #meaning abs(balance) == 2
+        else:  # meaning abs(balance) == 2
             if balance == 2:
                 balance_child = y.getLeft().getLeft().getHeight() - y.getLeft().getRight().getHeight()
                 if balance_child > -1:
-                    right_rotate(self, y)
+                    right_rotate(y)
                     counter += 1
                 else:
                     left_rotate(self, y.getLeft())
-                    right_rotate(self, y)
+                    right_rotate(y)
                     counter += 2
-            else: #meaning balance = -2
+            else:  # meaning balance = -2
                 balance_child = y.getRight().getLeft().getHeight() - y.getRight().getRight().getHeight()
                 if balance_child < 1:
                     left_rotate(self, y)
                     counter += 1
                 else:
-                    right_rotate(self, y.getRight())
-                    left_rotate(self, y)
+                    right_rotate(y.getRight())
+                    left_rotate(y)
                     counter += 2
-            if is_insert: #if this is after an insert, we can stop after a single rotation
+            if is_insert:  # if this is after an insert, we can stop after a single rotation
                 break
             y.updateHeight()
             y.updateBF()
@@ -652,7 +669,7 @@ def fix_tree(self, x, is_insert=False):
             y = y.getParent()
     self.setRoot(y)
 
-    y = x #updating sizes if needed
+    y = x  # updating sizes if needed
     while y is not None:
         y.updateSize()
         y.updateHeight()
@@ -665,10 +682,12 @@ def fix_tree(self, x, is_insert=False):
 """left_rotate method rotates the inputted node and its children to the left, and updates their height, size and BF accordingly
     @pre: x is not None
     @pre: x is an AVLNode"""
-def left_rotate(self, x):
+
+
+def left_rotate(x):
     y = x.getRight()
 
-    #updating the pointers
+    # updating the pointers
     x.setRight(y.getLeft())
     x.getRight().setParent(x)
     y.setLeft(x)
@@ -680,7 +699,7 @@ def left_rotate(self, x):
             x.getParent().setLeft(y)
     x.setParent(y)
 
-    #updating heights and BF
+    # updating heights and BF
     x.updateHeight()
     y.updateHeight()
     x.updateBF()
@@ -688,10 +707,13 @@ def left_rotate(self, x):
     x.updateSize()
     y.updateSize()
 
+
 """left_rotate method rotates the inputted node and its children to the left, and updates their height, size and BF accordingly
     @pre: x is not None
     @pre: x is an AVLNode"""
-def right_rotate(self, x):
+
+
+def right_rotate(x):
     y = x.getLeft()
 
     # updating the pointers
@@ -721,7 +743,7 @@ def right_rotate(self, x):
 
 
 def copy(self):
-    head = copy_rec(self.root)
+    head = copy_rec(self.getRoot())
     ret = AVLTreeList()
     ret.root = head
     ret.size = ret.root.size
@@ -734,18 +756,17 @@ def copy(self):
 
 
 def copy_rec(node):
-    if not node.isReal:
+    if not node.isRealNode():
         return AVLNode(None)
 
     node_copy = AVLNode(node.value)
-    if not node.parent.isReal: #parent = None, node is not None means that said node is the root
-        node_copy.parent = None
+    node_copy.setParent(node.getParent())
 
     node_copy.right = copy_rec(node.right)
-    if node.right.isReal:
+    if node.right.isRealNode():
         node_copy.right.setParent(node_copy)
     node_copy.left = copy_rec(node.left)
-    if node.left.isReal:
+    if node.left.isRealNode():
         node_copy.left.setParent(node_copy)
 
     node_copy.height = node.height
@@ -753,4 +774,3 @@ def copy_rec(node):
     node_copy.bf = node.bf
 
     return node_copy
-
