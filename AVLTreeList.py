@@ -196,6 +196,14 @@ class AVLNode(object):
         out = "(" + str(self.left) + ", " + str(self.value) + ", " + str(self.right) + ")"
         return out
 
+    def new_connections(self, parent, left, right):
+        self.setParent(parent)
+        self.setLeft(left)
+        self.setRight(right)
+        self.updateSize()
+        self.updateHeight()
+        self.updateBF()
+
 
 """
 A class implementing the ADT list, using an AVL tree.
@@ -235,7 +243,11 @@ class AVLTreeList(object):
     """
 
     def retrieve(self, i):
-        return tree_select(self.root, i + 1).getValue()
+        # finger trees, O(log(i))
+        a = self.min
+        while a.parent is not None and a.parent.isRealNode() and a.getSize() < i + 1:
+            a = a.parent
+        return tree_select(a, i + 1).getValue() if a.isRealNode() else None
 
     """inserts val at position i in the list
 
@@ -244,7 +256,7 @@ class AVLTreeList(object):
     @param i: The intended index in the list to which we insert val
     @type val: str
     @param val: the value we inserts
-    @rtype: list
+    @rtype: int
     @returns: the number of rebalancing operation due to AVL rebalancing
     """
 
@@ -252,6 +264,8 @@ class AVLTreeList(object):
         z = insert_tree(self, i, AVLNode(val))
         ret = fix_tree(self, z, True)
         self.size = self.root.getSize()
+        self.min = minimum(self.root)
+        self.max = maximum(self.root)
         return ret
 
     """deletes the i'th item in the list
@@ -265,13 +279,14 @@ class AVLTreeList(object):
 
     def delete(self, i):
         curr = tree_delete(self, tree_select(self.getRoot(), i + 1))
-
+        self.size = self.root.getSize()
         if curr is None:
             return -1
         ret = fix_tree(self, curr)
 
         self.size = self.root.getSize()
-
+        self.min = minimum(self.root)
+        self.max = maximum(self.root)
         return ret
 
     """returns the value of the first item in the list
@@ -317,16 +332,15 @@ class AVLTreeList(object):
     """
 
     def sort(self):
-
         lst = self.listToArray()
-        lst.sort()  # runtime is O(n) by the API.
+        lst.sort()  # runtime is O(nlogn) by the API.
         lst.append(0)  # index of the current node, for fill.
         new_tree = copy(self)
-        fill_tree_in_order(new_tree.root, lst)
+        fill_tree_in_order(new_tree.root, lst)  # O(n)
         return new_tree
 
     """permute the info values of the list
-     
+
     @rtype: list
     @returns: an AVLTreeList where the values are permuted.
     """
@@ -340,7 +354,6 @@ class AVLTreeList(object):
                 # Swap arr[i] with the element at random index
                 lst[i], lst[j] = lst[j], lst[i]
 
-
         if not self.root.isRealNode():
             return AVLTreeList()
         lst = self.listToArray()
@@ -349,7 +362,6 @@ class AVLTreeList(object):
         new_tree = copy(self)
         fill_tree_in_order(new_tree.root, lst)
         return new_tree
-
 
     """concatenates lst to self
 
@@ -360,7 +372,27 @@ class AVLTreeList(object):
     """
 
     def concat(self, lst):
-        return None
+        if lst is None or not lst.root.isRealNode():  # if other lst is empty, do nothing
+            return self.root.getHeight() + 1
+        elif not self.root.isRealNode():  # if this lst is empty, make it equal lst.
+            self.setRoot(lst.root)
+            self.min = lst.min
+            self.max = lst.max
+            self.size = lst.size
+            return self.root.getHeight() + 1
+        else:
+            h1 = self.root.getHeight()
+            h2 = lst.root.getHeight()
+            if self.root.getHeight() <= lst.root.getHeight():
+                max_in_tree = self.max
+                tree_delete(self, self.max)  # O(log(n)) because of the update of max.
+                join(self, max_in_tree, lst)
+                self.setRoot(lst.root)
+            else:
+                min_in_tree = lst.min
+                tree_delete(lst, self.min)  # O(log(n)) because of the update of min.
+                join(lst, min_in_tree, self)
+            return abs(h1 - h2)
 
     """searches for a *value* in the list
 
@@ -390,12 +422,6 @@ class AVLTreeList(object):
 
     def setRoot(self, root):
         self.root = root
-
-    """updates the minimum / maximum of the tree"""
-
-    def updateMinMax(self):
-        self.min = minimum(self.root)
-        self.max = maximum(self.root)
 
     """representation of the tree"""
 
@@ -522,6 +548,7 @@ def insert_tree(bst, i, z):
             y = minimum(bst.getRoot())
             y.setLeft(z)
             z.setParent(y)
+
     elif i == bst.length():
         y = maximum(bst.getRoot())
         y.setRight(z)
@@ -535,13 +562,14 @@ def insert_tree(bst, i, z):
             y = predecessor(x)
             y.setRight(z)
             z.setParent(y)
-    bst.updateMinMax()
     return z
 
 
 """tree-delete method. returns the parent of the physically deleted node
     @pre: bst is not None and z is in bst
-    @pre: z is not None and z.isRealNode()"""
+    @pre: z is not None and z.isRealNode()
+    @rtype: AVLNode
+    @return: the parent of the node deleted."""
 
 
 def tree_delete(bst, z):
@@ -556,6 +584,7 @@ def tree_delete(bst, z):
             y.setRight(AVLNode(None))
         if z == y.getLeft():
             y.setLeft(AVLNode(None))
+        z.new_connections(None, AVLNode(None), AVLNode(None))
     if not z.getLeft().isRealNode() or not z.getRight().isRealNode():  # z has only one child
         x = z.getRight()
         if z.getLeft().isRealNode():  # z only has left child.
@@ -574,7 +603,6 @@ def tree_delete(bst, z):
         val = x.getValue()
         y = tree_delete(bst, x)  # z's successor has no left child, so the returned value will be x's parent for sure
         z.setValue(val)
-    bst.updateMinMax()
     return y
 
 
@@ -647,13 +675,13 @@ def fix_tree(self, x, is_insert=False):
                     right_rotate(y)
                     counter += 1
                 else:
-                    left_rotate(self, y.getLeft())
+                    left_rotate(y.getLeft())
                     right_rotate(y)
                     counter += 2
             else:  # meaning balance = -2
                 balance_child = y.getRight().getLeft().getHeight() - y.getRight().getRight().getHeight()
                 if balance_child < 1:
-                    left_rotate(self, y)
+                    left_rotate(y)
                     counter += 1
                 else:
                     right_rotate(y.getRight())
@@ -744,12 +772,12 @@ def right_rotate(x):
 
 
 def copy(self):
-    head = copy_rec(self.getRoot())
+    head = copy_rec(self.root)
     ret = AVLTreeList()
     ret.root = head
     ret.size = ret.root.size
-    ret.min = minimum(ret.root)
-    ret.max = maximum(ret.root)
+    ret.min = minimum(ret.root) if ret.root.isRealNode() else AVLNode(None)
+    ret.max = maximum(ret.root) if ret.root.isRealNode() else AVLNode(None)
     return ret
 
 
@@ -775,3 +803,22 @@ def copy_rec(node):
     node_copy.bf = node.bf
 
     return node_copy
+
+
+"""join method from class.
+    @pre: t1.length >= 1
+    @pre: t2.length >= 1
+    @pre: height(t1) <= height(t2)
+    @pre: x isn't in t1 or t2."""
+
+
+def join(t1, x, t2):
+    b = t2.min
+    while b.parent is not None and b.parent.getHeight() <= t1.getRoot().getHeight():
+        b = b.getParent()
+    x.setLeft(t1.getRoot())
+    x.setRight(b)
+    c = b.getParent()
+    if c is not None:
+        c.new_connections(c.getParent(), x, c.getRight())
+    fix_tree(t2, x)
