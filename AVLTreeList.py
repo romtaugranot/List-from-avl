@@ -340,6 +340,7 @@ class AVLTreeList(object):
                 # Swap arr[i] with the element at random index
                 lst[i], lst[j] = lst[j], lst[i]
 
+
         if not self.root.isRealNode():
             return AVLTreeList()
         lst = self.listToArray()
