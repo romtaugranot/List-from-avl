@@ -232,10 +232,10 @@ class AVLTreeList(object):
     @param i: index in the list
     @rtype: str
     @returns: the the value of the i'th item in the list
+    @runtime: O(log(i)), using finger trees.
     """
 
     def retrieve(self, i):
-        # finger trees, O(log(i))
         a = self.min
         while a.parent is not None and a.parent.isRealNode() and a.getSize() < i + 1:
             a = a.parent
@@ -250,6 +250,7 @@ class AVLTreeList(object):
     @param val: the value we inserts
     @rtype: int
     @returns: the number of rebalancing operation due to AVL rebalancing
+    @runtime: O(log(n))
     """
 
     def insert(self, i, val):
@@ -267,6 +268,7 @@ class AVLTreeList(object):
     @param i: The intended index in the list to be deleted
     @rtype: int
     @returns: the number of rebalancing operation due to AVL rebalancing
+    @runtime: O(log(n))
     """
 
     def delete(self, i):
@@ -285,6 +287,7 @@ class AVLTreeList(object):
 
     @rtype: str
     @returns: the value of the first item, None if the list is empty
+    @runtime: O(1)
     """
 
     def first(self):
@@ -294,6 +297,7 @@ class AVLTreeList(object):
 
     @rtype: str
     @returns: the value of the last item, None if the list is empty
+    @runtime: O(1)
     """
 
     def last(self):
@@ -303,6 +307,7 @@ class AVLTreeList(object):
 
     @rtype: list
     @returns: a list of strings representing the data structure
+    @runtime: O(n)
     """
 
     def listToArray(self):
@@ -312,6 +317,7 @@ class AVLTreeList(object):
 
     @rtype: int
     @returns: the size of the list
+    @runtime: O(1)
     """
 
     def length(self):
@@ -321,6 +327,7 @@ class AVLTreeList(object):
 
     @rtype: list
     @returns: an AVLTreeList where the values are sorted by the info of the original list.
+    @runtime: O(nlog(n))
     """
 
     def sort(self):
@@ -366,6 +373,7 @@ class AVLTreeList(object):
 
     @rtype: list
     @returns: an AVLTreeList where the values are permuted.
+    @runtime: O(n)
     """
 
     def permutation(self):
@@ -392,6 +400,7 @@ class AVLTreeList(object):
     @param lst: a list to be concatenated after self
     @rtype: int
     @returns: the absolute value of the difference between the height of the AVL trees joined
+    @runtime: O(log(n))
     """
 
     def concat(self, lst):
@@ -423,6 +432,7 @@ class AVLTreeList(object):
     @param val: a value to be searched
     @rtype: int
     @returns: the first index that contains val, -1 if not found.
+    @runtime: O(log(n))
     """
 
     def search(self, val):
@@ -450,18 +460,9 @@ class AVLTreeList(object):
     """Rom's and Ido's functions"""
 
 
-"""sorted-order method from class."""
-
-
-def sorted_order(x):
-    if x is not None and x.isRealNode():
-        sorted_order(x.getLeft())
-        print(x)
-        sorted_order(x.getRight())
-
-
 """minimum method from class.
-    @pre: x is not None and x.isRealNode()"""
+    @pre: x is not None and x.isRealNode()
+    @runtime: O(log(n))"""
 
 
 def minimum(x):
@@ -471,7 +472,8 @@ def minimum(x):
 
 
 """maximum method.
-    @pre: x is not None and x.isRealNode()"""
+    @pre: x is not None and x.isRealNode()
+    @runtime: O(log(n))"""
 
 
 def maximum(x):
@@ -482,7 +484,8 @@ def maximum(x):
 
 """successor method from class.
     @inv: successor is None if and only if x is the largest in the tree.
-    @pre: x is not None and x.isRealNode()"""
+    @pre: x is not None and x.isRealNode()
+    @runtime: O(log(n))"""
 
 
 def successor(x):
@@ -497,7 +500,8 @@ def successor(x):
 
 """predecessor method from class.
     @inv: predecessor is None if and only if x is the smallest in the tree.
-    @pre: x is not None and x.isRealNode()"""
+    @pre: x is not None and x.isRealNode()
+    @runtime: O(log(n))"""
 
 
 def predecessor(x):
@@ -512,7 +516,8 @@ def predecessor(x):
 
 """tree-select from class.
     @pre: x is not None and x.isRealNode()
-    @pre: 0 <= k <= x.getSize()"""
+    @pre: 0 <= k <= x.getSize()
+    @runtime: O(log(n))"""
 
 
 def tree_select(x, k):
@@ -526,7 +531,8 @@ def tree_select(x, k):
 
 
 """tree-rank from class.
-    @pre: x is not None and x.isRealNode()"""
+    @pre: x is not None and x.isRealNode()
+    @runtime: O(log(n))"""
 
 
 def tree_rank(x):
@@ -542,7 +548,8 @@ def tree_rank(x):
 """updates all the size fields from z up to the root
     this method is used to help insertion / deletion / rotation etc.
     @pre: z is not None and z.isRealNode()
-    @pre: shift is an integer, can be negative."""
+    @pre: shift is an integer, can be negative.
+    @runtime: O(log(n))"""
 
 
 def update_sizes_up_to_root(self, z, shift):
@@ -555,7 +562,8 @@ def update_sizes_up_to_root(self, z, shift):
 """insert-tree from the powerpoint representation
     @pre: bst is not None
     @pre:z is not None and z.isRealNode()
-    @pre: 0 <= i < bst's size"""
+    @pre: 0 <= i < bst's size
+    @runtime: O(log(n))"""
 
 
 def insert_tree(bst, i, z):
@@ -588,7 +596,8 @@ def insert_tree(bst, i, z):
     @pre: bst is not None and z is in bst
     @pre: z is not None and z.isRealNode()
     @rtype: AVLNode
-    @return: the parent of the node deleted."""
+    @return: the parent of the node deleted.
+    @runtime: O(log(n))"""
 
 
 def tree_delete(bst, z):
@@ -629,7 +638,8 @@ def tree_delete(bst, z):
 
 
 """listToArray method, converts an avl tree into a list
-    @pre: node is not None"""
+    @pre: node is not None
+    @runtime: O(n)"""
 
 
 def listToArray(node):
@@ -646,7 +656,8 @@ def listToArray(node):
 
 """fill_tree_in_order method, inserts the values in lst to the tree
     @pre: node is not None
-    @pre: lst's size - index is the node's sub-tree size"""
+    @pre: lst's size - index is the node's sub-tree size
+    @runtime: O(n)"""
 
 
 def fill_tree_in_order(node, lst):
@@ -663,7 +674,8 @@ def fill_tree_in_order(node, lst):
 
 
 """search_tree method, looks for a value in the tree
-    @pre: val is a string"""
+    @pre: val is a string
+    @runtime: O(n)"""
 
 
 def search_tree(node, val):
@@ -673,7 +685,8 @@ def search_tree(node, val):
 
 
 """fix_tree method fixes nodes from inputted node up until the root, returns the number of rotations
-    @pre: node is not None"""
+    @pre: node is not None
+    @runtime: O(log(n))"""
 
 
 def fix_tree(self, x, is_insert=False):
@@ -732,7 +745,8 @@ def fix_tree(self, x, is_insert=False):
 
 """left_rotate method rotates the inputted node and its children to the left, and updates their height, size and BF accordingly
     @pre: x is not None
-    @pre: x is an AVLNode"""
+    @pre: x is an AVLNode
+    @runtime: O(1)"""
 
 
 def left_rotate(x):
@@ -761,7 +775,8 @@ def left_rotate(x):
 
 """left_rotate method rotates the inputted node and its children to the left, and updates their height, size and BF accordingly
     @pre: x is not None
-    @pre: x is an AVLNode"""
+    @pre: x is an AVLNode
+    @runtime: O(1)"""
 
 
 def right_rotate(x):
@@ -790,7 +805,8 @@ def right_rotate(x):
 
 """copy creates and returns a new AVLTreeList with the same structure as the inputted AVLTreeList
     @rtype: AVLTreeList
-    @returns: a copy of the original AVLTreeList"""
+    @returns: a copy of the original AVLTreeList
+    @runtime: O(n)"""
 
 
 def copy(self):
@@ -803,7 +819,8 @@ def copy(self):
     return ret
 
 
-"""copy_rec copies and returns the root of the copied AVLTreeList"""
+"""copy_rec copies and returns the root of the copied AVLTreeList
+    @runtime: O(n)"""
 
 
 def copy_rec(node):
@@ -831,7 +848,8 @@ def copy_rec(node):
     @pre: t1.length >= 1
     @pre: t2.length >= 1
     @pre: height(t1) <= height(t2)
-    @pre: x isn't in t1 or t2."""
+    @pre: x isn't in t1 or t2.
+    @runtime: O(log(n))"""
 
 
 def join(t1, x, t2):
