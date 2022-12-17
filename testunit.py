@@ -13,17 +13,21 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(None, tree.getRoot())
 
 
-    def test_insertion_and_deletion(self):  # checking length(), empty() and height while at it.
+    def test_insertion_and_deletion(self):  # checking length(), empty(), listToArray and height while at it.
         tree = AVLTreeList()
-
+        self.assertEqual([], tree.listToArray())
+        self.assertEqual(0, tree.length())
         tree.insert(0, "meow")
         self.assertFalse(tree.empty())
         self.assertEqual(1, tree.length())
-        self.assertEqual("((None), meow, (None))", str(tree))
+        self.assertEqual("meow", tree.root.value)
+        self.assertEqual("meow", tree.max.value)
+        self.assertEqual("meow", tree.min.value)
+        self.assertEqual("['meow']", str(tree.listToArray()))
         tree.delete(0)
         self.assertEqual(0, tree.length())
         self.assertTrue(tree.empty())
-        self.assertEqual("(None)", str(tree))
+        self.assertEqual(None, tree.root.value)
 
         for i in range(10000):
             val = str(i)
@@ -31,12 +35,16 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual([str(i) for i in range(10000)], tree.listToArray())
         self.assertLessEqual(13, tree.getRoot().getHeight())
         self.assertEqual(10000, tree.length())
+        self.assertEqual("9999", tree.max.value)
+        self.assertEqual("0", tree.min.value)
 
         for i in range(9999, 4999, -1):
             tree.delete(i)
         self.assertEqual([str(i) for i in range(5000)], tree.listToArray())
         self.assertLessEqual(12, tree.getRoot().getHeight())
         self.assertEqual(5000, tree.length())
+        self.assertEqual("4999", tree.max.value)
+        self.assertEqual("0", tree.min.value)
 
         for i in range(5000):
             if (4999 - i) % 2 == 0:
@@ -44,8 +52,104 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual([str(i) for i in range(5000) if i % 2 != 0], tree.listToArray())
         self.assertLessEqual(11, tree.getRoot().getHeight())
         self.assertEqual(2500, tree.length())
+        self.assertEqual("4999", tree.max.value)
+        self.assertEqual("1", tree.min.value)
 
 
+    def test_first_and_last(self):
+        tree = AVLTreeList()
+        self.assertEqual(None, tree.first())
+        self.assertEqual(None, tree.last())
+
+        for i in range(100):
+            val = str(i)
+            tree.insert(i, val)
+
+        self.assertEqual("0", tree.first())
+        self.assertEqual("99", tree.last())
+
+        tree.delete(99)
+        self.assertEqual("98", tree.last())
+        tree.delete(0)
+        self.assertEqual("1", tree.first())
+
+        for i in range(97, -1, -1):
+            tree.delete(i)
+        self.assertEqual(None, tree.first())
+        self.assertEqual(None, tree.last())
+
+
+    def test_permutation(self):
+        tree = AVLTreeList()
+        self.assertEqual(str(tree), str(tree.permutation()))
+        tree.insert(0, '0')
+        self.assertEqual(str(tree), str(tree.permutation()))
+        for i in range(1, 10):
+            val = str(i)
+            tree.insert(i, val)
+        # print(tree.permutation().listToArray())
+        lst = tree.permutation().listToArray()
+        lst.sort()
+        self.assertEqual([str(i) for i in range(10)], lst)
+
+
+    def test_sort(self):
+        tree = AVLTreeList()
+        self.assertEqual(str(tree), str(tree.sort()))
+        tree.insert(0, '0')
+        self.assertEqual(str(tree), str(tree.sort()))
+        for i in range(1, 10):
+            val = str(i)
+            tree.insert(i, val)
+        tree = tree.permutation()
+        self.assertEqual([str(i) for i in range(10)], tree.sort().listToArray())
+
+
+    def test_concat(self):
+        tree1 = AVLTreeList()
+        tree2 = AVLTreeList()
+        r = tree1.concat(tree2)
+        self.assertEqual(0, r)
+        self.assertEqual(None, tree1.root.value)
+
+        for i in range(10):
+            val = str(i)
+            tree2.insert(i, val)
+        r = tree1.concat(tree2)
+        # print(r)
+        self.assertEqual([str(i) for i in range(10)], tree1.listToArray())
+
+        tree1 = AVLTreeList()
+        tree2 = AVLTreeList()
+        for i in range(20):
+            val = str(i)
+            tree1.insert(i, val)
+        for i in range(10):
+            val = str(i)
+            tree2.insert(i, val)
+        # print(tree1.listToArray())
+        # print(tree2.listToArray())
+        r = tree1.concat(tree2)
+        # print(r)
+        self.assertEqual(sorted([str(i) for i in range(20)] + [str(i) for i in range(10)]), tree1.sort().listToArray())
+
+
+    def test_search(self):
+        tree = AVLTreeList()
+        self.assertEqual(-1, tree.search("8"))
+        for i in range(1000):
+            val = str(i)
+            tree.insert(i, val)
+        self.assertEqual(500, tree.search("500"))
+        for i in range(999, -1, -1):
+            if i % 2 == 0:
+                tree.delete(i)
+        self.assertEqual(-1, tree.search("500"))
+        self.assertEqual(249, tree.search("499"))
+        for i in range(499, -1, -1):
+            tree.delete(i)
+        for i in range(0, 100):
+            self.assertEqual(-1, tree.search(str(i)))
 
 
 if __name__ == '__main__':

@@ -188,14 +188,6 @@ class AVLNode(object):
     def is_leaf(self):
         return self.isRealNode() and not self.left.isRealNode() and not self.right.isRealNode()
 
-    """in-order representation of the tree"""
-
-    def __repr__(self):
-        if self.left is None:  # only virtual nodes have children that are None
-            return "(None)"
-        out = "(" + str(self.left) + ", " + str(self.value) + ", " + str(self.right) + ")"
-        return out
-
     def new_connections(self, parent, left, right):
         self.setParent(parent)
         self.setLeft(left)
@@ -283,10 +275,10 @@ class AVLTreeList(object):
         if curr is None:
             return -1
         ret = fix_tree(self, curr)
-
         self.size = self.root.getSize()
         self.min = minimum(self.root)
         self.max = maximum(self.root)
+
         return ret
 
     """returns the value of the first item in the list
@@ -332,8 +324,39 @@ class AVLTreeList(object):
     """
 
     def sort(self):
+        def merge(A, B):
+            """ merging two lists into a sorted list
+                A and B must be sorted! """
+            n = len(A)
+            m = len(B)
+            C = [None for i in range(n + m)]
+
+            a = 0
+            b = 0
+            c = 0
+            while a < n and b < m:  # more element in both A and B
+                if A[a] < B[b]:
+                    C[c] = A[a]
+                    a += 1
+                else:
+                    C[c] = B[b]
+                    b += 1
+                c += 1
+
+            C[c:] = A[a:] + B[b:]  # append remaining elements (one of those is empty)
+
+            return C
+
+        def mergesort(lst):
+            """ recursive mergesort """
+            n = len(lst)
+            if n <= 1:
+                return lst
+            else:  # two recursive calls, then merge
+                return merge(mergesort(lst[0:n // 2]),
+                             mergesort(lst[n // 2:n]))
         lst = self.listToArray()
-        lst.sort()  # runtime is O(nlogn) by the API.
+        lst = mergesort(lst)  # runtime is O(nlog(n)).
         lst.append(0)  # index of the current node, for fill.
         new_tree = copy(self)
         fill_tree_in_order(new_tree.root, lst)  # O(n)
@@ -346,20 +369,20 @@ class AVLTreeList(object):
     """
 
     def permutation(self):
-        def shuffle(lst):
-            for i in range(len(lst) - 1, 0, -1):
+        def shuffle(list_to_shuffle):
+            for i in range(len(list_to_shuffle) - 1, 0, -1):
                 # Pick a random index from 0 to i
                 j = random.randint(0, i)
 
                 # Swap arr[i] with the element at random index
-                lst[i], lst[j] = lst[j], lst[i]
+                list_to_shuffle[i], list_to_shuffle[j] = list_to_shuffle[j], list_to_shuffle[i]
 
         if not self.root.isRealNode():
             return AVLTreeList()
-        lst = self.listToArray()
-        shuffle(lst)  # runtime is O(n) by the API.
+        lst = self.listToArray()  # O(n)
+        shuffle(lst)  # O(n).
         lst.append(0)  # index of the current node, for fill.
-        new_tree = copy(self)
+        new_tree = copy(self)  # O(n)
         fill_tree_in_order(new_tree.root, lst)
         return new_tree
 
@@ -389,9 +412,9 @@ class AVLTreeList(object):
                 join(self, max_in_tree, lst)
                 self.setRoot(lst.root)
             else:
-                min_in_tree = lst.min
-                tree_delete(lst, self.min)  # O(log(n)) because of the update of min.
-                join(lst, min_in_tree, self)
+                max_in_tree = lst.max
+                tree_delete(lst, lst.max)  # O(log(n)) because of the update of min.
+                join(lst, max_in_tree, self)
             return abs(h1 - h2)
 
     """searches for a *value* in the list
@@ -423,10 +446,6 @@ class AVLTreeList(object):
     def setRoot(self, root):
         self.root = root
 
-    """representation of the tree"""
-
-    def __repr__(self):
-        return str(self.root)
 
     """Rom's and Ido's functions"""
 
@@ -575,6 +594,9 @@ def insert_tree(bst, i, z):
 def tree_delete(bst, z):
     if z == bst.getRoot() and z.is_leaf():
         bst.setRoot(AVLNode(None))  # make the root a virtual node, which means there are no nodes in the tree.
+        bst.min = AVLNode(None)
+        bst.max = AVLNode(None)
+        bst.size = 0
         return None
     update_sizes_up_to_root(bst, z, -1)
     y = z.getParent()
