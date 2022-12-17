@@ -185,8 +185,23 @@ class AVLNode(object):
     def isRealNode(self):
         return self.value is not None
 
+
+    """returns whether self is a leaf.
+
+        @rtype: bool
+        @returns: True iff node is leaf.
+        """
+
+
     def is_leaf(self):
         return self.isRealNode() and not self.left.isRealNode() and not self.right.isRealNode()
+
+    """sets parent, left and right child of the node and updates the size, height and bf.
+
+            @rtype: bool
+            @returns: True iff node is leaf.
+            """
+
 
     def new_connections(self, parent, left, right):
         self.setParent(parent)
@@ -432,7 +447,7 @@ class AVLTreeList(object):
     @param val: a value to be searched
     @rtype: int
     @returns: the first index that contains val, -1 if not found.
-    @runtime: O(log(n))
+    @runtime: O(n)
     """
 
     def search(self, val):
@@ -552,7 +567,7 @@ def tree_rank(x):
     @runtime: O(log(n))"""
 
 
-def update_sizes_up_to_root(self, z, shift):
+def update_sizes_up_to_root(z, shift):
     y = z.parent
     while y is not None and y.isRealNode():
         y.setSize(y.getSize() + shift)
@@ -607,7 +622,7 @@ def tree_delete(bst, z):
         bst.max = AVLNode(None)
         bst.size = 0
         return None
-    update_sizes_up_to_root(bst, z, -1)
+    update_sizes_up_to_root(z, -1)
     y = z.getParent()
     if z.is_leaf():
         # z is not a root for certain
@@ -675,7 +690,7 @@ def fill_tree_in_order(node, lst):
 
 """search_tree method, looks for a value in the tree
     @pre: val is a string
-    @runtime: O(n)"""
+    @runtime: O(h + n) where h is the height of node"""
 
 
 def search_tree(node, val):
