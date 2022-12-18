@@ -1,6 +1,7 @@
 import unittest
+import random
 
-from AVLTreeList import AVLTreeList
+from AVLTreeList import AVLTreeList, successor
 
 
 class MyTestCase(unittest.TestCase):
@@ -150,6 +151,26 @@ class MyTestCase(unittest.TestCase):
             tree.delete(i)
         for i in range(0, 100):
             self.assertEqual(-1, tree.search(str(i)))
+
+
+
+    """def test_q1(self):
+        # for i in range(1, 11):
+        i = 5
+        tree = AVLTreeList()
+        n = 1500 * (2 ** i)
+        for j in range(0, n//2):
+            k = random.randint(0, tree.length())
+            tree.insert(k, str(k))
+        count = 0
+        while tree.length() != 0:
+            k = random.randint(0, tree.length() - 1)
+            # print(k, tree.length())
+            count += tree.delete(k)
+        print("count for i =", i, " is:", count)"""
+
+
+
 
 
 if __name__ == '__main__':

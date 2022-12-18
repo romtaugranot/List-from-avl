@@ -288,8 +288,8 @@ class AVLTreeList(object):
 
     def delete(self, i):
         curr = tree_delete(self, tree_select(self.getRoot(), i + 1))
-        self.size = self.root.getSize()
         if curr is None:
+            self.size = self.root.getSize()
             return -1
         ret = fix_tree(self, curr)
         self.size = self.root.getSize()
@@ -644,11 +644,22 @@ def tree_delete(bst, z):
         else:
             bst.setRoot(x)
         x.setParent(y)
+        z.new_connections(None, AVLNode(None), AVLNode(None))
     else:  # z has 2 children.
         x = successor(z)
         val = x.getValue()
         y = tree_delete(bst, x)  # z's successor has no left child, so the returned value will be x's parent for sure
-        z.setValue(val)
+        z_left = z.getLeft()
+        z_right = z.getRight()
+        z_parent = z.parent
+        node = AVLNode(val, z_parent, z_left, z_right)
+        z.new_connections(None, AVLNode(None), AVLNode(None))
+        z_right.setParent(node)
+        z_left.setParent(node)
+        if z_parent is not None and z == z_parent.getLeft():
+            z_parent.setLeft(node)
+        elif z_parent is not None and z == z_parent.getRight():
+            z_parent.setRight(node)
     return y
 
 
@@ -728,7 +739,7 @@ def fix_tree(self, x, is_insert=False):
                     left_rotate(y.getLeft())
                     right_rotate(y)
                     counter += 2
-            else:  # meaning balance = -2
+            elif balance == -2:  # meaning balance = -2
                 balance_child = y.getRight().getLeft().getHeight() - y.getRight().getRight().getHeight()
                 if balance_child < 1:
                     left_rotate(y)
@@ -737,6 +748,7 @@ def fix_tree(self, x, is_insert=False):
                     right_rotate(y.getRight())
                     left_rotate(y)
                     counter += 2
+
             if is_insert:  # if this is after an insert, we can stop after a single rotation
                 break
             y.updateHeight()
