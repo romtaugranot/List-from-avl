@@ -96,7 +96,9 @@ class AVLNode(object):
             """
 
     def getBF(self):
-        return self.left.height - self.right.height
+        if not self.isRealNode():
+            return 0
+        return self.getLeft().getHeight() - self.getRight().getHeight()
 
     """sets left child
 
@@ -196,6 +198,11 @@ class AVLNode(object):
         self.updateSize()
         self.updateHeight()
 
+    def __repr__(self):
+        if self.left is None:  # only virtual nodes have children that are None
+            return "(None)"
+        out = "(" + str(self.left) + ", " + str(self.value) + ", " + str(self.right) + ")"
+        return out
 
 """
 A class implementing the ADT list, using an AVL tree.
@@ -215,6 +222,9 @@ class AVLTreeList(object):
         self.max = self.root
 
     # add your fields here
+
+    def __repr__(self):
+        return str(self.root)
 
     """returns whether the list is empty
 
@@ -634,17 +644,20 @@ def tree_delete(bst, z):
         x = successor(z)
         val = x.getValue()
         y = tree_delete(bst, x)  # z's successor has no left child, so the returned value will be x's parent for sure
+        """
         z_left = z.getLeft()
         z_right = z.getRight()
         z_parent = z.parent
         node = AVLNode(val, z_parent, z_left, z_right)
-        z.new_connections(None, AVLNode(None), AVLNode(None))
-        z_right.setParent(node)
+        z.new_connections(None, AVLNode(None), AVLNode(None))"""
+        z.setValue(val)
+        """z_right.setParent(node)
         z_left.setParent(node)
         if z_parent is not None and z == z_parent.getLeft():
             z_parent.setLeft(node)
         elif z_parent is not None and z == z_parent.getRight():
             z_parent.setRight(node)
+        """
     return y
 
 
@@ -706,15 +719,19 @@ def fix_tree(self, x, is_insert=False):
     while y is not None and y.isRealNode():  # continue until we reach root
         height = y.getHeight()
         y.setHeight(1 + max(y.getLeft().getHeight(), y.getRight().getHeight()))
+        y.setSize(y.getRight().getSize() + y.getLeft().getSize() + 1)
         balance = y.getBF()
+        #if abs(balance) > 2:
+        #    print(balance, y.getHeight(), y.getLeft().getHeight(), y.getRight().getHeight(), self.size)
+        #    print(str(self))
+        #   break
         if abs(balance) < 2 and height == y.getHeight():  # if the height has not changed
             break
         elif abs(balance) < 2 and height != y.getHeight():  # if the height has changed
             y = y.getParent()
         else:  # meaning abs(balance) == 2
             if balance == 2:
-                balance_child = y.getLeft().getLeft().getHeight() - y.getLeft().getRight().getHeight()
-                if balance_child > -1:
+                if y.getLeft().getBF() > -1:
                     right_rotate(y)
                     counter += 1
                 else:
@@ -722,30 +739,32 @@ def fix_tree(self, x, is_insert=False):
                     right_rotate(y)
                     counter += 2
             elif balance == -2:  # meaning balance = -2
-                balance_child = y.getRight().getLeft().getHeight() - y.getRight().getRight().getHeight()
-                if balance_child < 1:
+                if y.getRight().getBF() < 1:
                     left_rotate(y)
                     counter += 1
                 else:
                     right_rotate(y.getRight())
                     left_rotate(y)
                     counter += 2
-
+            if abs(y.getBF()) >= 2:
+                print(y.getBF(), str(y), y.getLeft().getHeight(), y.getRight().getHeight())
             if is_insert:  # if this is after an insert, we can stop after a single rotation
                 break
             y.updateHeight()
             y = y.getParent()
+
     if self.root.isRealNode():
         y = self.root
         while y.getParent() is not None and y.getParent().isRealNode():
             y = y.getParent()
+            if abs(y.getBF()) >= 2:
+                print(balance, str(y))
     self.setRoot(y)
 
     y = x  # updating sizes if needed
     while y is not None:
         y.updateSize()
         y = y.getParent()
-
     return counter
 
 
@@ -773,8 +792,8 @@ def left_rotate(x):
     # updating heights and BF
     x.updateHeight()
     y.updateHeight()
+    y.setSize(x.getSize())
     x.updateSize()
-    y.updateSize()
 
 
 """left_rotate method rotates the inputted node and its children to the left, and updates their height, size and BF accordingly
@@ -801,8 +820,8 @@ def right_rotate(x):
     # updating heights and BF
     x.updateHeight()
     y.updateHeight()
+    y.setSize(x.getSize())
     x.updateSize()
-    y.updateSize()
 
 
 """copy creates and returns a new AVLTreeList with the same structure as the inputted AVLTreeList
