@@ -21,7 +21,6 @@ class AVLNode(object):
         if value is None:  # node is virtual
             self.left = None
             self.right = None
-            self.bf = 0
             self.height = -1
             self.size = 0
         else:  # node is not virtual
@@ -35,7 +34,7 @@ class AVLNode(object):
                 self.right = right
             self.height = max(self.left.height, self.right.height) + 1
             self.updateSize()
-            self.updateBF()
+
 
     """returns the left child
     @rtype: AVLNode
@@ -97,7 +96,7 @@ class AVLNode(object):
             """
 
     def getBF(self):
-        return self.bf
+        return self.left.height - self.right.height
 
     """sets left child
 
@@ -153,14 +152,6 @@ class AVLNode(object):
     def setSize(self, size):
         self.size = size
 
-    """sets the BF of the node
-
-        @type bf: int
-        @param bf: balance factor of the node"""
-
-    def setBF(self, bf):
-        self.bf = bf
-
     """updates the height of the node according to its children"""
 
     def updateHeight(self):
@@ -170,11 +161,6 @@ class AVLNode(object):
 
     def updateSize(self):
         self.size = self.left.size + self.right.size + 1
-
-    """updates the bf of the node according to its children"""
-
-    def updateBF(self):
-        self.bf = self.left.height - self.right.height
 
     """returns whether self is not a virtual node 
 
@@ -209,7 +195,6 @@ class AVLNode(object):
         self.setRight(right)
         self.updateSize()
         self.updateHeight()
-        self.updateBF()
 
 
 """
@@ -604,7 +589,7 @@ def insert_tree(bst, i, z):
             y = predecessor(x)
             y.setRight(z)
             z.setParent(y)
-    return z
+    return z.getParent()
 
 
 """tree-delete method. returns the parent of the physically deleted node
@@ -717,17 +702,14 @@ def search_tree(node, val):
 
 def fix_tree(self, x, is_insert=False):
     counter = 0
-    y = x.getParent()
-    if not is_insert:
-        y = x
+    y = x
     while y is not None and y.isRealNode():  # continue until we reach root
-        height = 1 + max(y.getLeft().getHeight(), y.getRight().getHeight())
-        balance = y.getLeft().getHeight() - y.getRight().getHeight()
+        height = y.getHeight()
+        y.setHeight(1 + max(y.getLeft().getHeight(), y.getRight().getHeight()))
+        balance = y.getBF()
         if abs(balance) < 2 and height == y.getHeight():  # if the height has not changed
             break
         elif abs(balance) < 2 and height != y.getHeight():  # if the height has changed
-            y.updateHeight()
-            y.updateBF()
             y = y.getParent()
         else:  # meaning abs(balance) == 2
             if balance == 2:
@@ -752,7 +734,6 @@ def fix_tree(self, x, is_insert=False):
             if is_insert:  # if this is after an insert, we can stop after a single rotation
                 break
             y.updateHeight()
-            y.updateBF()
             y = y.getParent()
     if self.root.isRealNode():
         y = self.root
@@ -763,8 +744,6 @@ def fix_tree(self, x, is_insert=False):
     y = x  # updating sizes if needed
     while y is not None:
         y.updateSize()
-        y.updateHeight()
-        y.updateBF()
         y = y.getParent()
 
     return counter
@@ -794,8 +773,6 @@ def left_rotate(x):
     # updating heights and BF
     x.updateHeight()
     y.updateHeight()
-    x.updateBF()
-    y.updateBF()
     x.updateSize()
     y.updateSize()
 
@@ -824,8 +801,6 @@ def right_rotate(x):
     # updating heights and BF
     x.updateHeight()
     y.updateHeight()
-    x.updateBF()
-    y.updateBF()
     x.updateSize()
     y.updateSize()
 
@@ -866,7 +841,6 @@ def copy_rec(node):
 
     node_copy.height = node.height
     node_copy.size = node.size
-    node_copy.bf = node.bf
 
     return node_copy
 
