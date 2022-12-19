@@ -265,7 +265,7 @@ class AVLTreeList(object):
 
     def insert(self, i, val):
         z = insert_tree(self, i, AVLNode(val))
-        ret = fix_tree(self, z, True)
+        ret = fix_tree(self, z)
         self.size = self.root.getSize()
         self.min = minimum(self.root)
         self.max = maximum(self.root)
@@ -282,14 +282,18 @@ class AVLTreeList(object):
     """
 
     def delete(self, i):
-        curr = tree_delete(self, tree_select(self.getRoot(), i + 1))
-        if curr is None:
-            self.size = self.root.getSize()
-            return -1
-        ret = fix_tree(self, curr)
+        parent_of_deleted = tree_delete(self, tree_select(self.getRoot(), i + 1))
+        ret = 0
+        if parent_of_deleted is not None:
+            ret = fix_tree(self, parent_of_deleted)
         self.size = self.root.getSize()
-        self.min = minimum(self.root)
-        self.max = maximum(self.root)
+        if self.root.isRealNode():
+            self.min = minimum(self.root)
+            self.max = maximum(self.root)
+        else:
+            ret = -1
+            self.min = self.root
+            self.max = self.root
 
         return ret
 
@@ -555,24 +559,11 @@ def tree_rank(x):
     return r
 
 
-"""updates all the size fields from z up to the root
-    this method is used to help insertion / deletion / rotation etc.
-    @pre: z is not None and z.isRealNode()
-    @pre: shift is an integer, can be negative.
-    @runtime: O(log(n))"""
-
-
-def update_sizes_up_to_root(z, shift):
-    y = z.parent
-    while y is not None and y.isRealNode():
-        y.setSize(y.getSize() + shift)
-        y = y.getParent()
-
-
 """insert-tree from the powerpoint representation
     @pre: bst is not None
     @pre:z is not None and z.isRealNode()
     @pre: 0 <= i < bst's size
+    @return: z's parent.
     @runtime: O(log(n))"""
 
 
@@ -617,7 +608,6 @@ def tree_delete(bst, z):
         bst.max = AVLNode(None)
         bst.size = 0
         return None
-    update_sizes_up_to_root(z, -1)
     y = z.getParent()
     if z.is_leaf():
         # z is not a root for certain
@@ -644,20 +634,7 @@ def tree_delete(bst, z):
         x = successor(z)
         val = x.getValue()
         y = tree_delete(bst, x)  # z's successor has no left child, so the returned value will be x's parent for sure
-        """
-        z_left = z.getLeft()
-        z_right = z.getRight()
-        z_parent = z.parent
-        node = AVLNode(val, z_parent, z_left, z_right)
-        z.new_connections(None, AVLNode(None), AVLNode(None))"""
         z.setValue(val)
-        """z_right.setParent(node)
-        z_left.setParent(node)
-        if z_parent is not None and z == z_parent.getLeft():
-            z_parent.setLeft(node)
-        elif z_parent is not None and z == z_parent.getRight():
-            z_parent.setRight(node)
-        """
     return y
 
 
@@ -713,21 +690,14 @@ def search_tree(node, val):
     @runtime: O(log(n))"""
 
 
-def fix_tree(self, x, is_insert=False):
+def fix_tree(bst, x):
     counter = 0
     y = x
     while y is not None and y.isRealNode():  # continue until we reach root
-        height = y.getHeight()
         y.setHeight(1 + max(y.getLeft().getHeight(), y.getRight().getHeight()))
         y.setSize(y.getRight().getSize() + y.getLeft().getSize() + 1)
         balance = y.getBF()
-        #if abs(balance) > 2:
-        #    print(balance, y.getHeight(), y.getLeft().getHeight(), y.getRight().getHeight(), self.size)
-        #    print(str(self))
-        #   break
-        if abs(balance) < 2 and height == y.getHeight():  # if the height has not changed
-            break
-        elif abs(balance) < 2 and height != y.getHeight():  # if the height has changed
+        if abs(balance) < 2:
             y = y.getParent()
         else:  # meaning abs(balance) == 2
             if balance == 2:
@@ -748,22 +718,20 @@ def fix_tree(self, x, is_insert=False):
                     counter += 2
             if abs(y.getBF()) >= 2:
                 print(y.getBF(), str(y), y.getLeft().getHeight(), y.getRight().getHeight())
-            if is_insert:  # if this is after an insert, we can stop after a single rotation
-                break
             y.updateHeight()
+            y.updateSize()
             y = y.getParent()
 
-    if self.root.isRealNode():
-        y = self.root
+    if bst.root.isRealNode():
+        y = bst.root
         while y.getParent() is not None and y.getParent().isRealNode():
             y = y.getParent()
-            if abs(y.getBF()) >= 2:
-                print(balance, str(y))
-    self.setRoot(y)
+    bst.setRoot(y)
 
-    y = x  # updating sizes if needed
+    y = x  # updating sizes and heights if needed, to be sure.
     while y is not None:
         y.updateSize()
+        y.updateHeight()
         y = y.getParent()
     return counter
 
