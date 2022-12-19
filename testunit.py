@@ -1,12 +1,15 @@
 import unittest
 import random
+import collections
+from listFromArrays import ListArray
+import time
 
 from AVLTreeList import AVLTreeList, successor
 
 
 class MyTestCase(unittest.TestCase):
 
-    def printBF(self, node):
+    """def printBF(self, node):
         if not node.isRealNode():
             return
         if node.getBF() >= 2:
@@ -157,11 +160,11 @@ class MyTestCase(unittest.TestCase):
         for i in range(499, -1, -1):
             tree.delete(i)
         for i in range(0, 100):
-            self.assertEqual(-1, tree.search(str(i)))
+            self.assertEqual(-1, tree.search(str(i)))"""
 
 
 
-    def test_q1(self):
+    """def test_q1(self):
         for i in range(1, 11):
             tree = AVLTreeList()
             n = 1500 * (2 ** i)
@@ -170,6 +173,87 @@ class MyTestCase(unittest.TestCase):
                 k = random.randint(0, tree.length())
                 count += tree.insert(k, str(k))
             print("count for i =", i, " is:", count)
+
+        for i in range(1, 11):
+            tree = AVLTreeList()
+            n = 1500 * (2 ** i)
+            count = 0
+            for j in range(0, n//2):
+                k = random.randint(0, tree.length())
+                count += tree.insert(k, str(k))
+            for j in range(0, n//2):
+                if j % 2 == 0:
+                    k = random.randint(0, tree.length()-1)
+                    count += tree.delete(k)
+                else:
+                    k = random.randint(0, tree.length())
+                    count += tree.insert(k, str(k))
+            print("count for i =", i, " is:", count)"""
+
+    """def test_q2a(self):
+        for i in range(1, 11):
+            n = 1500 * i
+            times = []
+            for m in range(10):
+                #tree = AVLTreeList()
+                linked_lst = collections.deque()
+                #array_list = ListArray()
+                start = time.time()
+                for j in range(0, n):
+                    #tree.insert(0, str(j))
+                    linked_lst.insert(0, str(j))
+                    #array_list.insert_first(str(j))
+                end = time.time()
+                times.append(end-start)
+
+            print("average time for i =", i, " is:", self.avg(times))"""
+
+    def test_q2b(self):
+        for i in range(1, 11):
+            n = 1500 * i
+            times = []
+            for m in range(10):
+                tree = AVLTreeList()
+                #linked_lst = collections.deque()
+                #array_list = ListArray()
+                start = time.time()
+                for j in range(0, n):
+                    k = random.randint(0, tree.length())
+                    tree.insert(k, str(j))
+                    #linked_lst.insert(k, str(j))
+                    #array_list.insert(str(j), k)
+                end = time.time()
+                times.append(end-start)
+
+            print("average time for i =", i, " is:", self.avg(times))
+
+    def test_q2c(self):
+        for i in range(1, 11):
+            n = 1500 * i
+            times = []
+            for m in range(10):
+                #tree = AVLTreeList()
+                #linked_lst = collections.deque()
+                array_list = ListArray()
+                start = time.time()
+                for j in range(0, n):
+                    k = len(array_list)
+                    #tree.insert(k, str(j))
+                    #linked_lst.insert(k, str(j))
+                    array_list.insert(str(j), k)
+                end = time.time()
+                times.append(end-start)
+
+            print("average time for i =", i, " is:", self.avg(times))
+
+
+    @staticmethod
+    def avg(lst):
+        n = len(lst)
+        count = 0
+        for i in range(n):
+            count += lst[i]
+        return count / n
 
 
 if __name__ == '__main__':
