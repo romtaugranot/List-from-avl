@@ -676,6 +676,7 @@ def fill_tree_in_order(node, lst):
 
 """search_tree method, looks for a value in the tree
     @pre: val is a string
+    @rtype: int
     @runtime: O(h + n) where h is the height of node"""
 
 
@@ -687,6 +688,7 @@ def search_tree(node, val):
 
 """fix_tree method fixes nodes from inputted node up until the root, returns the number of rotations
     @pre: node is not None
+    @rtype: int
     @runtime: O(log(n))"""
 
 
@@ -736,7 +738,7 @@ def fix_tree(bst, x):
     return counter
 
 
-"""left_rotate method rotates the inputted node and its children to the left, and updates their height, size and BF accordingly
+"""left_rotate method rotates the inputted node and its children to the left, and updates their height and size accordingly
     @pre: x is not None
     @pre: x is an AVLNode
     @runtime: O(1)"""
@@ -757,14 +759,14 @@ def left_rotate(x):
             x.getParent().setLeft(y)
     x.setParent(y)
 
-    # updating heights and BF
+    # updating heights and size
     x.updateHeight()
     y.updateHeight()
     y.setSize(x.getSize())
     x.updateSize()
 
 
-"""left_rotate method rotates the inputted node and its children to the left, and updates their height, size and BF accordingly
+"""left_rotate method rotates the inputted node and its children to the left, and updates their height and size accordingly
     @pre: x is not None
     @pre: x is an AVLNode
     @runtime: O(1)"""
@@ -785,7 +787,7 @@ def right_rotate(x):
             x.getParent().setLeft(y)
     x.setParent(y)
 
-    # updating heights and BF
+    # updating heights and size
     x.updateHeight()
     y.updateHeight()
     y.setSize(x.getSize())
@@ -809,6 +811,7 @@ def copy(self):
 
 
 """copy_rec copies and returns the root of the copied AVLTreeList
+    @rtype: AVLNode
     @runtime: O(n)"""
 
 
